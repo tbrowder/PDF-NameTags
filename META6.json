@@ -1,0 +1,25 @@
+{
+  "auth": "zef:tbrowder",
+  "authors": [
+    "Tom Browder"
+  ],
+  "build-depends": [
+  ],
+  "depends": [
+  ],
+  "description": "Provides a Raku program to create name tags on a PDF document: eight per two-sided page",
+  "license": "Artistic-2.0",
+  "name": "PDF::NameTags",
+  "perl": "6.d",
+  "provides": {
+    "PDF::NameTags": "lib/PDF/NameTags.rakumod"
+  },
+  "resources": [
+  ],
+  "source-url": "",
+  "tags": [
+  ],
+  "test-depends": [
+  ],
+  "version": "0.0.1"
+}
