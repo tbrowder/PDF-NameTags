@@ -6,18 +6,28 @@
   "build-depends": [
   ],
   "depends": [
+    "QueryOS",
+    "PDF::API6",
+    "PDF::Lite",
+    "PDF::Content::Color :ColorName, :color",
+    "PDF::Content::FontObj",
+    "PDF::Content::XObject"
   ],
   "description": "Provides a Raku program to create name tags on a PDF document: eight per two-sided page",
   "license": "Artistic-2.0",
   "name": "PDF::NameTags",
   "perl": "6.d",
   "provides": {
-    "PDF::NameTags": "lib/PDF/NameTags.rakumod"
+    "PDF::NameTags": "lib/PDF/NameTags.rakumod",
+    "PDF::NameTags::FreeFonts": "lib/PDF/NameTags/FreeFonts.rakumod",
+    "PDF::NameTags::Subs": "lib/PDF/NameTags/Subs.rakumod",
+    "PDF::NameTags::Vars": "lib/PDF/NameTags/Vars.rakumod"
   },
   "resources": [
   ],
-  "source-url": "",
+  "source-url": "https://github.com/tbrowder/PDF-NameTags.git",
   "tags": [
+    "pdf labels tags name"
   ],
   "test-depends": [
   ],

@@ -1,0 +1,16 @@
+# My initial guess at the rose window colors (rgb triplets)
+# based on my comparing the image on the church website
+# to the W3C rgb color picker website.
+# 
+# I may update the values as needed after seeing printed results.
+# Note names are from: 
+# <https://colornamer.robertcooper.me>.
+# See the site for his list of 30,217
+# unique color names.
+
+255, 204, 102 # qing yellow 
+  0,   0,   0 # black  
+153, 204, 255 # apocyan
+  0, 102, 255 # blue ribbon
+ 51, 153, 102 # green fondant
+204,  51,   0 # pleasant pomegranate

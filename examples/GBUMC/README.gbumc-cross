@@ -1,0 +1,24 @@
+Update: see David's input on XObject
+   $page.to-xobject() method
+   see latest Content t/do.t
+   how is the $pdf.pages method defined?
+      page(0) vs page(1)
+      with new pdf, check it after pdf.add-page
+         first page is .pages.head == .pages[0]
+
+Plan for forming the cross.
+
+The end result should look like Rose Window:
+
+  outer white wheel
+  rounded-corner quarter cutouts
+    clockwise cuts?
+  background stained-glass look
+    layers of colors
+
+Make a separate prog just to build the cross from 
+  a text file input of cords and color codes
+Then play with the assembly till it looks right.
+Then integrate it into the main module
+  and final product.
+

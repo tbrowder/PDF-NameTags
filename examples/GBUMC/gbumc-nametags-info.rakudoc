@@ -1,0 +1,129 @@
+=begin pod
+
+=TITLE GBUMC Name Tags: The Project
+=AUTHOR Tom Browder
+=DATE 2024-09-17
+
+=head3 Introduction
+
+This paper describes my project to create suitable name tags for use
+by GBUMC congregants and staff.
+
+=head3 A. Status as of Sunday, 2024-09-15
+
+I will continue to tweak the name tags, and welcome any suggested
+changes. I do plan to make the embellishment pattern (aka GBUMC logo)
+exactly the same as the one that appears on the bottom-right corner of
+today’s bulletin. There are also technical issues to fix that unduly
+slow the generation of each name tag.
+
+=head3 B. My motivation
+
+In my advanced age, it is getting harder to remember names. Seeing
+congregants with an easily-readable name tag helps recalling the name
+for use in conversation. My name tag design fits that requirement.
+
+Importantly, it also identifies one as a GBUMC congregant and is very
+suitable for wear at any church-related event, particularly public
+events such as Trunk or Treat or other outreach events.
+
+=head3 C. Unique features of the name tag
+
+1. If printed correctly on two-sided paper, the same design (and
+names) appear even if it is flipped over as happens so often when one
+is wearing them.
+
+2. Dimensions, text, colors, and embellishments are easily changed.
+
+3. They are cheap to produce: Clear plastic badge holders from Walmart
+(including our local "little" Walmart) or Amazon can be bought for 50
+cents or less and they have pocket clips included. Suitable lanyards
+are also inexpensive.
+
+4. With the current size of them, eight name tags can printed per
+sheet of paper. (I know the church has a good color-capable printer.
+
+5. They are easy to cut out and assemble.
+
+6. Mistakes are readily corrected.
+
+=head3 D. Producing the name tags
+
+I have created a free, publicly available (see details below), Raku
+computer language program (see L<https://Raku.org>) that creates the
+two-sided PDF sheet for US Letter paper in Portrait orientation. The
+program is command-line executed on computers running a GNU/Linux
+operating system (I use Debian). It should also run on a MacOS system
+when I eventually port the program to it using my wife's Mac (that is
+a low priority until users request it by filing an issue on GitHub OR
+emailing me).
+
+Note the Mac system will have to have some Rakudo and other
+prerequisite programs installed (I have one to work with for my use,
+but check with your IT person for any computers on the church's
+private network).
+
+It is also possible to port it to Windows, but that is not so easy
+given the weirdisms of the Windows OS preventing so many prerequistes
+from being ported to it.
+
+=head3 E. Running the name tag program
+
+The only input required is a list of names in a plain text document
+such as a CSV file or a Windows Notepad file. That file is provided as
+the only input to the program, and the output is a single PDF document
+suitable for printing on almost any modern printer, or viewing in most
+modern web browsers.
+
+The input file must be formatted according to these rules (see
+Formatting notes):
+
+=item one name per line
+=item last-name first-name middle-name
+=item2 in that order, middle-name is optional
+
+=head4 Formatting notes:
+
+=item names may be separated by spaces or commas
+=item2 in a CSV file use the first two or three cells
+=item the first-name (along with any middle-name) will be printed on the
+first line of the name tag
+=item the last-name will be printed on the second line of the name tag
+
+=head3 F. Program code
+
+The program source code is publicly available in the /dev directory of
+the FontFactory repository in my GitHub account (see
+L<https://github.com/tbrowder/FontFactory>). The program file name is
+'make-name-tags.raku'.
+
+=head3 G. Technical notes
+
+=head4 Issues to be corrected:
+
+=item Make the logo image an XOject to improve efficiency
+=item Crop the image to eliminate bounding transparent pixels
+=item Create hot links for the URL references in this document
+
+=head4 Possible enhancements:
+
+=item Add staff position as a third line
+in a smaller font size
+
+=head3 Summary
+
+The project provides a turn-key solution to an inexpensive way to
+provide name tags if desired. It has been fun to do and it has added
+to my knowledge (and that of my Raku PDF mentor) of PDF graphics
+handling and clipping.
+
+I am happy to assist in producing or helping with any part of using
+the name tags. I can also easily produce the PDF documents at home if
+I receive the input files, and then email them back to the requestor.
+
+I am available to answer questions or provide other help in person or
+by email (tom.browder@gmail.com) or mobile phone (850-830-8078).  (I
+normally don't answer unless I recognize the number, but will return
+your call if you leave a voice message.)
+
+=end pod
