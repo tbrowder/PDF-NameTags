@@ -1,5 +1,4 @@
 #!/bin/env raku
-
 use PDF::API6;
 use PDF::Lite;
 use PDF::Content::Color :ColorName, :color;
@@ -48,6 +47,8 @@ if not @*ARGS {
       job details (and the back side will be blank).
 
     Options:
+      1|2    - Select option one (original method) or two
+                 (XForm object method), default: 1.
       eg     - Produces $Nclips example PDFs. Currently there
                are $Nclips examples numbered from 1 to $Nclips.
 
@@ -68,12 +69,14 @@ my $debug     = 0;
 my $landscape = 0;
 my $go        = 0;
 my $clip      = 0;
+my $method    = 1;
 
 my $NC; # selected clip number [0..^$Nclips]
 for @*ARGS {
-    when /^ :i s/ { ++$show  }
-    when /^ :i d/ { ++$debug }
-    when /^ :i g/ { ++$go    }
+    when /^ :i s/  { ++$show  }
+    when /^ (1|2)/ { $method = +$0 }
+    when /^ :i d/  { ++$debug }
+    when /^ :i g/  { ++$go    }
     when /^ :i [e|c] \w*? ['='? (\d) ]? / {
         ++$clip;
         if $0.defined {
@@ -168,7 +171,7 @@ while @n.elems {
     # put first and last name found in top margin
     ++$page-num;
     make-badge-page @p, :side<front>, :$page, :$page-num, :$debug, 
-                        :project-dir($gbumc-dir);
+                        :project-dir($gbumc-dir), :$method;
 
     say "Working back page..." if $debug;
     # process the back side of the page
@@ -176,15 +179,10 @@ while @n.elems {
     # put first and last name found in top margin
     ++$page-num;
     make-badge-page @p, :side<back>, :$page, :$page-num, :$debug,
-                        :project-dir($gbumc-dir);
-
-    =begin comment
-    my @c = @p.batch(2);
-    # new row with data for one or two
-    # labels
-    =end comment
+                        :project-dir($gbumc-dir), :$method;
 }
 
 # add page numbers: Page N of M
+# TODO compress to 300 dpi
 $pdf.save-as: $ofile;
 say "See name tags file: $ofile";

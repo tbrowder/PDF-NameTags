@@ -98,6 +98,7 @@ sub make-badge-page(
     :$page!,
     :$page-num!,
     :$project-dir!,
+    :$method!,
     :$debug,
 ) is export {
     my @r = @p;
@@ -143,9 +144,9 @@ sub make-badge-page(
         }
 
         make-label($nam1, :width($bw), :height($bh), :cx($hmid1), :$cy,
-            :$page, :$project-dir, :$debug);
+            :$page, :$project-dir, :$method, :$debug);
         make-label($nam2, :width($bw), :height($bh), :cx($hmid2), :$cy,
-            :$page, :$project-dir, :$debug) if $nam2;
+            :$page, :$project-dir, :$method, :$debug) if $nam2;
     }
 
 } # sub make-badge-page(
@@ -157,7 +158,8 @@ sub make-label(
     :$height,     # points
     :$cx!, :$cy!, # center of label in points
     :$page!,
-    :$project-dir,
+    :$project-dir!,
+    :$method!,
     :$debug,
     # default color for top portion is blue
 
@@ -242,10 +244,10 @@ sub make-label(
 
     make-cross(:$diam, :$thick, :width($cwidth),
                :height($cheight), :cx($ccxL), :cy($ccy), :$page, 
-               :$project-dir, :$debug);
+               :$method, :$project-dir, :$debug);
     make-cross(:$diam, :$thick, :width($cwidth),
                :height($cheight), :cx($ccxR), :cy($ccy), :$page, 
-               :$project-dir, :$debug);
+               :$method, :$project-dir, :$debug);
 
     #==========================================
     # gbumc text in the blue part
@@ -398,6 +400,7 @@ sub make-cross(
     :$cx!, :$cy!, # points
     :$page!,
     :$project-dir!,
+    :$method!,
     :$debug,
     # default color is white
 ) is export {
@@ -434,7 +437,8 @@ sub make-cross(
     draw-circle-clip $cx, $cy, $radius, :fill, :fill-color(color White),
                      :stroke, :stroke-color(color White), :$page;
 
-    place-image $cx, $cy, :$image-path, :$page;
+    place-image $cx, $cy, :$image-path, :$method, :$page;
+
     =begin comment
     # the colored pattern
     draw-circle-clip $cx, $cy, $radius-2, :clip, :$page;
@@ -1394,6 +1398,7 @@ sub place-image(
     $cx, $cy,
     :$image-path!,
     :$page!,
+    :$method!,
     :$debug,
     ) is export {
 
@@ -1404,24 +1409,22 @@ sub place-image(
     # TODO incorporate an XObject form on pages[0] for reuse. See how to
     # do that in file 'xt/1-xform.t'.
     #
-    # Plan:
-=begin comment
-=end comment
 
-    my PDF::Content::XObject $image .= open: $image-path;
     if $debug {
         note "DEBUG: using image path: $image-path";
     }
 
-    my $w       = $image.width;
-    my $h       = $image.height;
-    my $hscaled = $h/30;
-    my $wscaled = $w/30;
-
-    my $g = $page.gfx: :trace;
-    $g.Save;
-    $g.do: $image, :position($cx, $cy), :width($wscaled), :height($hscaled),
-                   :valign<center>, :align<center>;
-    $g.Restore;
+    if $method == 1 {
+        my PDF::Content::XObject $image .= open: $image-path;
+        my $w       = $image.width;
+        my $h       = $image.height;
+        my $hscaled = $h/30;
+        my $wscaled = $w/30;
+        my $g = $page.gfx: :trace;
+        $g.Save;
+        $g.do: $image, :position($cx, $cy), :width($wscaled), :height($hscaled),
+                       :valign<center>, :align<center>;
+        $g.Restore;
+    }
 
 } # sub place-image(

@@ -1,0 +1,18 @@
+The Adobe engineers actually considered this with the original design
+of PDF. Resources, including Fonts and XObjects are usually stored in
+the Pages Resources dictionary, but they can be stored further up the
+resources tree and inherited by multiple pages. Resources can be
+effectively scoped to multiple pages.
+
+I've added support for this in PDF::Content 0.8.8 release. The
+following will set up global sharing of resources between pages
+
+use PDF::Lite;
+my PDF::Lite $pdf .= new;
+$pdf.Pages.global-resources-scope = True;
+
+Any pages you add after this will globally share fonts and
+XObjects. They will share the same resources dictionary and have the
+same keys for those resources.
+
+See also t/pdf-page-tree.t
