@@ -185,4 +185,4 @@ while @n.elems {
 # add page numbers: Page N of M
 # TODO compress to 300 dpi
 $pdf.save-as: $ofile;
-say "See name tags file: $ofile";
+say "See name tags file: $ofile (using \$method $method)";

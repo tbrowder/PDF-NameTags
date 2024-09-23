@@ -1426,5 +1426,7 @@ sub place-image(
                        :valign<center>, :align<center>;
         $g.Restore;
     }
-
+    else {
+        die "FATAL: Unable to handle method 2 yet.";
+    }
 } # sub place-image(
