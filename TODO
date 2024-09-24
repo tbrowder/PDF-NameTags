@@ -19,6 +19,9 @@ Add query to program to select printer
 Page numbers on all pages
 + list of names and page numbers
 
+Output file names should identify designated printer,
+  dpi, and maybe a short date/time indication
+
 Minimize vertical center gutter to a constant
 + widen vertical whitespace after first row
 + squeeze vertical whitespace between third
@@ -29,6 +32,7 @@ Alway create two documents as a set:
   job sheet
   toc
   name tag sheets
+
 Make all outlnes on all pages, even with no names.
 + outlines should be dashed
 
