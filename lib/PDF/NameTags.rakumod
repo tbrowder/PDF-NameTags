@@ -146,7 +146,7 @@ sub make-badge-page(
 
         if $rnum == 1 {
             # place page data and printer info
-            # assume the midpoint of the center vertical gutter 
+            # assume the midpoint of the center vertical gutter
             #   is $hmid1 + (0.5 * ($hmid2 - $hmid1))
             my $cx-gutter = $hmid1 + 0.5 * ($hmid2 - $hmid1);
             my $cy-gutter = 0.5 * $ph;
@@ -255,10 +255,10 @@ sub make-label(
     # the rose window background
 
     make-cross(:$diam, :$thick, :width($cwidth),
-               :height($cheight), :cx($ccxL), :cy($ccy), :$page, 
+               :height($cheight), :cx($ccxL), :cy($ccy), :$page,
                :$method, :$project-dir, :$debug);
     make-cross(:$diam, :$thick, :width($cwidth),
-               :height($cheight), :cx($ccxR), :cy($ccy), :$page, 
+               :height($cheight), :cx($ccxR), :cy($ccy), :$page,
                :$method, :$project-dir, :$debug);
 
     #==========================================
@@ -1459,9 +1459,9 @@ sub place-image(
 } # sub place-image(
 
 sub write-page-data(
-    :$printer, 
-    :$cx!, 
-    :$cy!, 
+    :$printer,
+    :$cx!,
+    :$cy!,
     :$side!,
     :$page!,
     :$debug,
@@ -1477,3 +1477,44 @@ sub write-page-data(
         .print: "$printer ($side)", :align<center>, :valign<center>;
     }
 } #  sub write-page-data(
+
+sub make-printer-test-doc(
+) is export {
+} # sub make-printer-test-doc
+
+#===== run/help
+# printers
+our %printers is export = %(
+    1 => "Tom's HP",
+    2 => "GBUMC Color",
+    3 => "UPS Store (GBZ, near 'little' Walmart)",
+    4 => "UPS Store (near Winn-Dixie)",
+    5 => "Office Depot (near P'cola Airport)",
+);
+
+sub help() is export {
+    print qq:to/HERE/;
+    Usage: {$*PROGRAM.basename} go | <csv file> [...options...]
+
+    Given a list of names, writes them on reversible paper
+      for a two-sided name tag on Letter paper.
+    The front side of the first two-sided page will contain
+      job details (and the back side will be blank).
+
+    Options:
+      1|2    - Select option one (original method) or two
+                 (XForm object method), default: 1.
+
+      show   - Gives details of the job based on the input name
+               list and card dimension parameters, then exits.
+               The information is the same as on the printed job
+               cover sheet.
+
+      p=N    - For printer N. See list by number, default: 1 (Tom's HP)
+
+    HERE
+    exit
+} # sub help() is export
+
+sub run(@args) is export {
+} # sub run(@args) is export

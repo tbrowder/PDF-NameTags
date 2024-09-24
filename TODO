@@ -1,4 +1,5 @@
 Make a bleed sheet for printer registration
++ new subroutine
 + fill entire sheet with 1/4-inch grid
 + fill one-inch margin with light gray
 + print one two-sided document with each page
@@ -38,7 +39,7 @@ DONE:   + send one to Pam to get a GBUMC sample
 
 Put all bin/* code into /lib modules
 
-Add important PDF::Content tests to a special test 
+Add important PDF::Content tests to a special test
   directory, say 'xt'
   + make a more user-oriented version of each
 
@@ -47,7 +48,7 @@ Enable using either mode to make
   + when functional, test for time
     differences
 
-Make a user test for the XObject 
+Make a user test for the XObject
   dictionary
   + try saving a PDF page doc
     and reusing it in a new foc
@@ -61,4 +62,3 @@ Try online order for a couple of pages
   + local UPS Store
   + Winn-Dixie UPS Store
   + Office Depot
-

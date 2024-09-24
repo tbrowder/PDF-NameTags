@@ -1,4 +1,16 @@
 #!/bin/env raku
+
+# now running initially from lib/NameTags.rakumod
+use PDF::NameTags;
+
+if not @*ARGS {
+    help()
+}
+else {
+    run @*ARGS;
+}
+
+=finish
 use PDF::API6;
 use PDF::Lite;
 use PDF::Content::Color :ColorName, :color;
@@ -191,7 +203,7 @@ while @n.elems {
 
     # TODO put first and last name found in top margin
     ++$page-num;
-    make-badge-page @p, :side<front>, :$page, :$page-num, :$debug, 
+    make-badge-page @p, :side<front>, :$page, :$page-num, :$debug,
                         :$printer, :project-dir($gbumc-dir), :$method;
 
     say "Working back page..." if $debug;

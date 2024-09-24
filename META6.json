@@ -20,6 +20,7 @@
   "provides": {
     "PDF::NameTags": "lib/PDF/NameTags.rakumod",
     "PDF::NameTags::FreeFonts": "lib/PDF/NameTags/FreeFonts.rakumod",
+    "PDF::NameTags::Help": "lib/PDF/NameTags/Help.rakumod",
     "PDF::NameTags::Subs": "lib/PDF/NameTags/Subs.rakumod",
     "PDF::NameTags::Vars": "lib/PDF/NameTags/Vars.rakumod"
   },
