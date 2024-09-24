@@ -11,6 +11,8 @@
     "PDF::Lite",
     "PDF::Content::Color :ColorName, :color",
     "PDF::Content::FontObj",
+    "PDF::Tags",
+    "PDF::Font::Loader::HarfBuzz",
     "PDF::Content::XObject"
   ],
   "description": "Provides a Raku program to create name tags on a PDF document: eight per two-sided page",
