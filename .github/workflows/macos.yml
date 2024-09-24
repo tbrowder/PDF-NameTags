@@ -24,7 +24,11 @@ jobs:
           raku-version: ${{ matrix.raku-version }}
       - name: Install Dependencies
         run: |
+          brew install freetype
+          brew unlink fontconfig
+          brew install fontconfig --HEAD
+          brew install harfbuzz
+          brew install font-freefont
           zef install --/test --deps-only .
-          zef install --/test App::Prove6
-      - name: Run Tests
-        run: prove6 -l t
+      - name: Install
+        run: zef install --debug .
