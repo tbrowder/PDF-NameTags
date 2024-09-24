@@ -1,0 +1,30 @@
+DONE: Add printer and obverse/reverse to each page
+DONE:   + send one to Pam to get a GBUMC sample
+  + check same with Office Depot and both UPS Stores
+
+Put all bin/* code into /lib modules
+
+Add important PDF::Content tests to a special test 
+  directory, say 'xt'
+  + make a more user-oriented version of each
+
+Enable using either mode to make
+  name tag docs
+  + when functional, test for time
+    differences
+
+Make a user test for the XObject 
+  dictionary
+  + try saving a PDF page doc
+    and reusing it in a new foc
+
+Make more generic for projects
++ need an image path
++ eventually use a config set for all projects
+
+Try online order for a couple of pages
+  to:
+  + local UPS Store
+  + Winn-Dixie UPS Store
+  + Office Depot
+
