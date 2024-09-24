@@ -94,11 +94,12 @@ sub get-dims-hash(--> Hash) is export {
 
 sub make-badge-page(
     @p,       # list of 8 or less names for a page
-    :$side! where $side ~~ /front | back/,
+    :$side!  where $side ~~ /front | back/,
     :$page!,
     :$page-num!,
     :$project-dir!,
     :$method!,
+    :$printer!,
     :$debug,
 ) is export {
     my @r = @p;
@@ -141,6 +142,17 @@ sub make-badge-page(
             # cell 2 on left
             $hmid1 = $h2; # for back side
             $hmid2 = $h1; # for back side
+        }
+
+        if $rnum == 1 {
+            # place page data and printer info
+            # assume the midpoint of the center vertical gutter 
+            #   is $hmid1 + (0.5 * ($hmid2 - $hmid1))
+            my $cx-gutter = $hmid1 + 0.5 * ($hmid2 - $hmid1);
+            my $cy-gutter = 0.5 * $ph;
+
+            write-page-data :$printer, :cx($cx-gutter), :cy($cy-gutter), :$side,
+                                       :$page, :$debug;
         }
 
         make-label($nam1, :width($bw), :height($bh), :cx($hmid1), :$cy,
@@ -1430,3 +1442,23 @@ sub place-image(
         die "FATAL: Unable to handle method 2 yet.";
     }
 } # sub place-image(
+
+sub write-page-data(
+    :$printer, 
+    :$cx!, 
+    :$cy!, 
+    :$side!,
+    :$page!,
+    :$debug,
+    ) is export {
+    #==========================================
+    # gbumc text in the blue part
+    $page.graphics: {
+        .transform: :translate($cx, $cy); # where $x/$y is the desired reference point
+        .transform: :rotate(deg2rad(90));
+        .FillColor = color Black; #rgb(0, 0, 0); # color Black
+        .font = %fonts<h>, #.core-font('HelveticaBold'),
+                 9; # the size
+        .print: "$printer ($side)", :align<center>, :valign<center>;
+    }
+} #  sub write-page-data(

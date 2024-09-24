@@ -37,6 +37,17 @@ for $names-file.IO.lines {
 
 my $Nclips = 3;
 
+# printers
+my %printers = %(
+    1 => "Tom's HP",
+    2 => "GBUMC Color",
+    3 => "UPS Store (GBZ, near 'little' Walmart)",
+    4 => "UPS Store (near Winn-Dixie)",
+    5 => "Office Depot (near P'cola Airport)",
+);
+
+# default printer
+my $printer = %printers<1>;
 if not @*ARGS {
     print qq:to/HERE/;
     Usage: {$*PROGRAM.basename} go | <csv file> [...options...]
@@ -59,6 +70,8 @@ if not @*ARGS {
                list and card dimension parameters, then exits.
                The information is the same as on the printed job
                cover sheet.
+
+      p=N    - For printer N. See list by number, default: 1 (Tom's HP)
 
     HERE
     exit
@@ -83,6 +96,14 @@ for @*ARGS {
             $NC = +$0;
             $NC = $Nclips if $NC > $Nclips;
         }
+    }
+    when /^ :i 'p=' (\d) $/ {
+        my $pnum = +$0;
+        unless %printers{$pnum}:exists {
+            say "FATAL: Unknown printer number $pnum";
+            exit;
+        }
+        $printer = %printers{$pnum};
     }
     default {
         say "Unknown arg '$_'...exiting.";
@@ -168,18 +189,18 @@ while @n.elems {
     # process the front page
     $page = $pdf.add-page;
 
-    # put first and last name found in top margin
+    # TODO put first and last name found in top margin
     ++$page-num;
     make-badge-page @p, :side<front>, :$page, :$page-num, :$debug, 
-                        :project-dir($gbumc-dir), :$method;
+                        :$printer, :project-dir($gbumc-dir), :$method;
 
     say "Working back page..." if $debug;
     # process the back side of the page
     $page = $pdf.add-page;
-    # put first and last name found in top margin
+    # TODO put first and last name found in top margin
     ++$page-num;
     make-badge-page @p, :side<back>, :$page, :$page-num, :$debug,
-                        :project-dir($gbumc-dir), :$method;
+                        :$printer, :project-dir($gbumc-dir), :$method;
 }
 
 # add page numbers: Page N of M
