@@ -875,17 +875,32 @@ sub draw-rectangle-clip(
 
 } # sub draw-rectangle(
 
-my $page-margins   = 0.4 * 72;
-# use letter paper
-my $cell-size      = 0.1; # desired minimum cell size (inches)
-   $cell-size     *= 72;  # now in points
-my $cells-per-grid = 10;  # heavier line every X cells
-
-my $cell-linewidth     =  0; # very fine line
-my $mid-grid-linewidth =  0.75; # heavier line width (every 5 cells)
-my $grid-linewidth     =  1.40; # heavier line width (every 10 cells)
+class GraphPaper {
+    #=========================
+    #== defaults for Letter paper
+    my $page-margins   = 0.4 * 72;
+    # use letter paper
+    my $cell-size      = 0.1; # desired minimum cell size (inches)
+    $cell-size     *= 72;  # now in points
+    my $cells-per-grid = 10;  # heavier line every X cells
+    my $cell-linewidth     =  0; # very fine line
+    my $mid-grid-linewidth =  0.75; # heavier line width (every 5 cells)
+    my $grid-linewidth     =  1.40; # heavier line width (every 10 cells)
+    #=========================
+}
 
 sub make-graph-paper($ofil) is export {
+    #=========================
+    #== defaults for Letter paper
+    my $page-margins   = 0.4 * 72;
+    # use letter paper
+    my $cell-size      = 0.1; # desired minimum cell size (inches)
+    $cell-size     *= 72;  # now in points
+    my $cells-per-grid = 10;  # heavier line every X cells
+    my $cell-linewidth     =  0; # very fine line
+    my $mid-grid-linewidth =  0.75; # heavier line width (every 5 cells)
+    my $grid-linewidth     =  1.40; # heavier line width (every 10 cells)
+    #=========================
     # Determine maximum horizontal grid squares for Letter paper,
     # portrait orientation, and 0.4-inch horizontal margins.
     my $page-width  = 8.5 * 72;

@@ -1,3 +1,37 @@
+Make a bleed sheet for printer registration
++ fill entire sheet with 1/4-inch grid
++ fill one-inch margin with light gray
++ print one two-sided document with each page
+  having the grid AND the printer ID
++ put the printer info in a colored box
+  in the middle of the two sheets including
+  a page number (obverse or reverse)
+
+Add job sheet, printer settings
++ no scaling (100% scaling)
++ two-sided (flip on long edge)
++ color
+
+Add query to program to select printer
++ option to show choices
+
+Page numbers on all pages
++ list of names and page numbers
+
+Minimize vertical center gutter to a constant
++ widen vertical whitespace after first row
++ squeeze vertical whitespace between third
+  and fourth rows
+
+Alway create two documents as a set:
++ three docs as a set
+  job sheet
+  toc
+  name tag sheets
+Make all outlnes on all pages, even with no names.
++ outlines should be dashed
+
+Decrease tag dimens to fit better in holders
 DONE: Add printer and obverse/reverse to each page
 DONE:   + send one to Pam to get a GBUMC sample
   + check same with Office Depot and both UPS Stores
