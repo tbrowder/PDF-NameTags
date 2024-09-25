@@ -7,6 +7,8 @@ use PDF::Content::XObject;
 use PDF::Tags;
 use PDF::Content::Text::Box;
 
+use Compress::PDF;
+
 use PDF::NameTags::FreeFonts;
 
 # My initial guess at the rose window colors (rgb triplets)
@@ -900,6 +902,7 @@ sub make-graph-paper($ofil) is export {
     my $cell-linewidth     =  0; # very fine line
     my $mid-grid-linewidth =  0.75; # heavier line width (every 5 cells)
     my $grid-linewidth     =  1.40; # heavier line width (every 10 cells)
+
     #=========================
     # Determine maximum horizontal grid squares for Letter paper,
     # portrait orientation, and 0.4-inch horizontal margins.
@@ -1480,6 +1483,7 @@ sub write-page-data(
 
 sub make-printer-test-doc(
 ) is export {
+    # use basic approach from graph paper
 } # sub make-printer-test-doc
 
 #===== run/help
@@ -1502,7 +1506,7 @@ sub help() is export {
       job details (and the back side will be blank).
 
     Options:
-      1|2    - Select option one (original method) or two
+      1|2    - Select option 1 (original method) or 2
                  (XForm object method), default: 1.
 
       show   - Gives details of the job based on the input name
@@ -1517,4 +1521,130 @@ sub help() is export {
 } # sub help() is export
 
 sub run(@args) is export {
+
+    #== from original bin file
+    # TODO make more generic before publishing
+    my $gbumc-dir = "./examples/GBUMC";
+    # TODO create a file name with date and time included
+    my $ofile = "Name-tags.pdf";
+    # input data file: rose-glass-patterns.dat
+    my $gfile = "$gbumc-dir/rose-glass-patterns.dat";
+    my @names;
+    #my $names-file = "$gbumc-dir/more-names.txt";
+    my $names-file = "$gbumc-dir/less-names.txt";
+    for $names-file.IO.lines {
+        next if $_ ~~ /\h* '#'/;
+        my @w = $_.words;
+        my $last = @w.pop;
+        my $first = @w.shift;
+        $first ~= " " ~ @w.pop if @w;
+        my $name = "$last $first";
+        @names.push: $name;
+    }
+    @names .= sort;
+    #== end chunk from original bin file
+
+    my $show      = 0;
+    my $debug     = 0;
+    my $landscape = 0;
+    my $go        = 0;
+    my $clip      = 0;
+    my $method    = 1;
+    my $printer   = 1;
+
+    for @args {
+        when /^ :i s/  { ++$show  }
+        when /^ (1|2)/ { $method = +$0 }
+        when /^ :i d/  { ++$debug }
+        when /^ :i g/  { ++$go    }
+        when /^ :i 'p=' (\d) $/ {
+            my $pnum = +$0;
+            unless %printers{$pnum}:exists {
+                say "WARNING: Unknown printer number $pnum.";
+                say "  Known printers:";
+                my @keys = %printers.keys.sort;
+                for @keys -> $k {
+                    my $v =  %printers{$k};
+                    say "    $k => '$v'";
+                }
+                exit;
+            }
+            $printer = %printers{$pnum};
+        }
+        when /^ :i p $/ {
+            say "WARNING: No printer was selected. Use 'p=N'.";
+            say "  For N of known printers:";
+            my @keys = %printers.keys.sort;
+            for @keys -> $k {
+                my $v =  %printers{$k};
+                say "    $k => '$v'";
+            }
+            exit;
+        }
+        default {
+            say "Unknown arg '$_'...exiting.";
+            exit;
+        }
+    }
+
+    if $show {
+        # TODO make a two-sided page of this:
+        my ($nc, $nr, $hgutter, $vgutter) = show-nums;
+        say "Badge width (inches):  {%dims<bwi>}";
+        say "Badge height (inches): {%dims<bhi>}";
+
+        say "Showing job details for portrait:";
+        say "  number of badge columns: $nc";
+        say "  number of badge rows:    $nr";
+        say "  horizontal gutter space: $hgutter";
+        say "  vertical gutter space:   $vgutter";
+        say " Total badges: {$nc*$nr}";
+
+        ($nc, $nr, $hgutter, $vgutter) = show-nums 1;
+        say "Showing job details for landscape:";
+        say "  number of badge columns: $nc";
+        say "  number of badge rows:    $nr";
+        say "  horizontal gutter space: $hgutter";
+        say "  vertical gutter space:   $vgutter";
+        say " Total badges: {$nc*$nr}";
+        exit;
+    }
+
+    # cols 2, rows 4, total 8, portrait
+    my @n = @names; # sample name "Mary Ann Deaver"
+
+    my PDF::Lite $pdf .= new;
+    $pdf.media-box = [0, 0, %dims<pw>, %dims<ph>];
+    my $page;
+    my $page-num = 0;
+    while @n.elems {
+
+        # a new page of names <= 8
+        my @p = @n.splice(0,8); # weird name
+
+        say @p.raku if 0 and $debug;
+
+        say "Working front page..." if $debug;
+        # process the front page
+        $page = $pdf.add-page;
+
+        # TODO put first and last name found in top margin
+        ++$page-num;
+        make-badge-page @p, :side<front>, :$page, :$page-num, :$debug,
+        :$printer, :project-dir($gbumc-dir), :$method;
+
+        say "Working back page..." if $debug;
+        # process the back side of the page
+        $page = $pdf.add-page;
+        # TODO put first and last name found in top margin
+        ++$page-num;
+        make-badge-page @p, :side<back>, :$page, :$page-num, :$debug,
+        :$printer, :project-dir($gbumc-dir), :$method;
+    }
+
+    # add page numbers: Page N of M
+    # TODO compress to 300 dpi
+    $pdf.save-as: $ofile;
+    say "See name tags file: $ofile (using \$method $method)";
+
 } # sub run(@args) is export

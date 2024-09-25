@@ -10,6 +10,7 @@ else {
     run @*ARGS;
 }
 
+
 =finish
 use PDF::API6;
 use PDF::Lite;
@@ -24,18 +25,15 @@ my %dims = get-dims-hash;
 
 # TODO make more generic before publishing
 my $gbumc-dir = "./examples/GBUMC";
-
 # TODO create a file name with date and time included
 my $ofile = "Name-tags.pdf";
 # input data file: rose-glass-patterns.dat
 my $gfile = "$gbumc-dir/rose-glass-patterns.dat";
-
 my @names;
 #my $names-file = "$gbumc-dir/more-names.txt";
 my $names-file = "$gbumc-dir/less-names.txt";
 for $names-file.IO.lines {
     next if $_ ~~ /\h* '#'/;
-
     my @w = $_.words;
     my $last = @w.pop;
     my $first = @w.shift;
@@ -44,8 +42,6 @@ for $names-file.IO.lines {
     @names.push: $name;
 }
 @names .= sort;
-#.say for @names;
-#exit;
 
 my $Nclips = 3;
 
@@ -148,7 +144,6 @@ if $show {
 
 # cols 2, rows 4, total 8, portrait
 my @n = @names; # sample name "Mary Ann Deaver"
-
 
 if $clip {
     for 0..^$Nclips -> $i {
