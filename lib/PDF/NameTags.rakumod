@@ -925,35 +925,34 @@ class GraphPaper {
             HERE
         }
     }
-
 }
 
-sub make-graph-paper($ofil) is export {
-    #=========================
-    #== defaults for Letter paper
-    my $page-margins   = 0.4 * 72;
-    # use letter paper
-    my $cell-size      = 0.1; # desired minimum cell size (inches)
-    $cell-size     *= 72;  # now in points
-    my $cells-per-grid = 10;  # heavier line every X cells
-    my $cell-linewidth     =  0; # very fine line
-    my $mid-grid-linewidth =  0.75; # heavier line width (every 5 cells)
-    my $grid-linewidth     =  1.40; # heavier line width (every 10 cells)
+sub make-graph-paper(
+    $ofil,
+    GraphPaper :$description,
+    :$debug,
+    ) is export {
 
+    # short-hand use
+    my $p = $description;
+
+    #=begin comment
     #=========================
     # Determine maximum horizontal grid squares for Letter paper,
     # portrait orientation, and 0.4-inch horizontal margins.
     my $page-width  = 8.5 * 72;
     my $page-height = 11  * 72;
-    my $max-graph-size = $page-width - $page-margins * 2;
-    my $max-ncells = $max-graph-size div $cell-size;
+    my $max-graph-size = $page-width - $p.margins * 2;
+    my $max-ncells = $max-graph-size div $p.cell-size;
 
-    my $ngrids = $max-ncells div $cells-per-grid;
-    my $graph-size = $ngrids * $cells-per-grid * $cell-size;
-    my $ncells = $ngrids * $cells-per-grid;
+    my $ngrids = $max-ncells div $p.cells-per-grid;
+    my $graph-size = $ngrids * $p.cells-per-grid * $p.cell-size;
+    my $ncells = $ngrids * $p.cells-per-grid;
+    #=end comment
+
     say qq:to/HERE/;
-    Given cells of size $cell-size x $cell-size points, with margins,
-      with grids of $cells-per-grid cells per grid = $ngrids.
+    Given cells of size $p.cell-size x $p.cell-size points, with margins,
+      with grids of $p.cells-per-grid cells per grid = $ngrids.
     HERE
 
     my $pdf  = PDF::Lite.new;
@@ -969,15 +968,15 @@ sub make-graph-paper($ofil) is export {
         # draw horizontal lines, $y is varying 0 to $twidth
         #   bottom to top
         for 0..$ncells -> $i {
-            my $y = $i * $cell-size;
+            my $y = $i * $p.cell-size;
             if not $i mod 10 {
-                .LineWidth = $grid-linewidth;
+                .LineWidth = $p.grid-linewidth;
             }
             elsif not $i mod 5 {
-                .LineWidth = $mid-grid-linewidth;
+                .LineWidth = $p.mid-grid-linewidth;
             }
             else {
-                .LineWidth = $cell-linewidth;
+                .LineWidth = $p.cell-linewidth;
             }
             .MoveTo: 0,           $y;
             .LineTo: $graph-size, $y;
@@ -986,15 +985,15 @@ sub make-graph-paper($ofil) is export {
         # draw vertical lines, $x is varying 0 to $twidth
         #   left to right
         for 0..$ncells -> $i {
-            my $x = $i * $cell-size;
+            my $x = $i * $p.cell-size;
             if not $i mod 10 {
-                .LineWidth = $grid-linewidth;
+                .LineWidth = $p.grid-linewidth;
             }
             elsif not $i mod 5 {
-                .LineWidth = $mid-grid-linewidth;
+                .LineWidth = $p.mid-grid-linewidth;
             }
             else {
-                .LineWidth = $cell-linewidth;
+                .LineWidth = $p.cell-linewidth;
             }
             .MoveTo: $x, 0;
             .LineTo: $x, $graph-size;
