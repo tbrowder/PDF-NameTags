@@ -900,11 +900,12 @@ sub make-graph-paper(
     my $ncells = $ngrids * $p.cells-per-grid;
     #=end comment
 
-
-    say qq:to/HERE/;
-    Given cells of size {$p.cell-size} x {$p.cell-size}, with margins,
-      with grids of {$p.cells-per-grid} cells per grid = $ngrids total grid cells.
-    HERE
+    if $debug {
+        say qq:to/HERE/;
+        Given cells of size {$p.cell-size} x {$p.cell-size}, with margins,
+          with grids of {$p.cells-per-grid} cells per grid = $ngrids total grid cells.
+        HERE
+    }
 
     my $pdf  = PDF::Lite.new;
     $pdf.media-box = 0, 0, $page-width, $page-height;
