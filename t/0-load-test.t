@@ -4,6 +4,7 @@ use Test;
 
 my @modules = <
     NameTags
+    GraphPaper
     NameTags::FreeFonts
     NameTags::Subs
     NameTags::Vars

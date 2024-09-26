@@ -21,6 +21,7 @@
   "name": "PDF::NameTags",
   "perl": "6.d",
   "provides": {
+    "PDF::GraphPaper": "lib/PDF/GraphPaper.rakumod",
     "PDF::NameTags": "lib/PDF/NameTags.rakumod",
     "PDF::NameTags::FreeFonts": "lib/PDF/NameTags/FreeFonts.rakumod",
     "PDF::NameTags::Help": "lib/PDF/NameTags/Help.rakumod",
