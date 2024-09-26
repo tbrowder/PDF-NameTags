@@ -1,43 +1,24 @@
-# from David Warring, 2024-09-21
-
 use Test;
 
-use PDF::Content::Color :rgb;
-use PDF::Content::FontObj;
-use PDF::Content::XObject;
-use PDF::Lite;
+use PDF::GraphPaper;
+use PDF::NameTags;
+use File::Temp;
 
-my PDF::Lite $pdf .= new;
-$pdf.media-box = [0, 0, 400, 120];
-my PDF::Lite::Page $page = $pdf.add-page;
+my $debug = 0; # unless debug is set, you cannot see the output file
+my $tdir;
 
-$page.graphics: {
-    my PDF::Content::FontObj $font = $pdf.core-font( :family<Helvetica> );
-    my PDF::Lite::XObject $form = .xobject-form(:BBox[0, 0, 95, 25]);
-    $form.graphics: {
-        .FillColor = rgb(.8, .9, .9);
-        .Rectangle: |$form<BBox>;
-        .paint: :fill;
-        .font = $font;
-        .FillColor = rgb(1, .3, .3);  # reddish
-        .say("Simple Form", :position[2, 5]);
-    }
-    my PDF::Content::XObject $jpeg .= open: "t/images/jpeg.jpg";
-    # sanity check of form vs image positioning
-    my @p1 = .do($form, :position(10, 30), :width(80), :height(30), :valign<top>);
-
-    my @p2 = .do($jpeg, :position(100, 30), :width(80), :height(30), :valign<top>);
-
-    # This should form a grid
-    .do($form, :position(10, 50), :width(80), :height(30), :valign<center>);
-    .do($jpeg, :position(100, 50), :width(80), :height(30), :valign<center>);
-    .do($form, :position(10, 70), :width(80), :height(30), :valign<bottom>);
-    .do($jpeg, :position(100, 70), :width(80), :height(30), :valign<bottom>);
+if $debug {
+    $tdir = "/tmp/t";
+    mkdir $tdir;
+}
+else {
+    $tdir = tempdir;
 }
 
-# ensure consistant document ID generation
-$pdf.id = $*PROGRAM-NAME.fmt('%-16.16s');
-lives-ok {$pdf.save-as: "xt/do.pdf"};
+plan 1;
 
-done-testing;
-
+lives-ok {
+    my PDF::GraphPaper $description .= new;
+    my $ofil = "$tdir/t.pdf";
+    make-graph-paper $ofil, :$description;
+}, "sub make-graph-paper lives-ok";

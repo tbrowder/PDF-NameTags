@@ -6,6 +6,7 @@
   "build-depends": [
   ],
   "depends": [
+    "File::Temp",
     "QueryOS",
     "Compress::PDF",
     "PDF::API6",

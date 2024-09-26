@@ -24,7 +24,7 @@ jobs:
           raku-version: ${{ matrix.raku-version }}
       - name: Install Dependencies
         run: |
-          brew unlink fontconfig
+          brew install fontconfig
           brew install freetype
           brew install harfbuzz
           brew install --cask font-freefont
