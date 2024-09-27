@@ -886,7 +886,6 @@ sub make-graph-paper(
     # short-hand use
     my $p = $description;
 
-    #=begin comment
     #=========================
     # Determine maximum horizontal grid squares for Letter paper,
     # portrait orientation, and 0.4-inch horizontal margins.
@@ -898,11 +897,10 @@ sub make-graph-paper(
     my $ngrids = $max-ncells div $p.cells-per-grid;
     my $graph-size = $ngrids * $p.cells-per-grid * $p.cell-size;
     my $ncells = $ngrids * $p.cells-per-grid;
-    #=end comment
 
     if $debug {
         say qq:to/HERE/;
-        Given cells of size {$p.cell-size} x {$p.cell-size}, with margins,
+        Given cells of size {$p.cell-size} x {$p.cell-size}, with margins {$p.margins},
           with grids of {$p.cells-per-grid} cells per grid = $ngrids total grid cells.
         HERE
     }
@@ -1475,6 +1473,7 @@ sub make-printer-test-doc(
     :$media!,
     :$debug,
 ) is export {
+
     # use basic approach from graph paper
     my $margins = 0;
     my $units;
@@ -1482,17 +1481,90 @@ sub make-printer-test-doc(
         $units = "in";
     }
     elsif $media ~~ /^ :i A/ {
-        $units = "cn";
+        $units = "cm";
     }
     else {
         die qq:to/HERE/;
         FATAL: Unexpected media name: '$media'.
                Only 'Letter' and 'A4' are currently handled.
-               
+
         HERE
     }
-    my $p = PDF::GraphPaper.new: :$media, :$units; 
+    my $p = PDF::GraphPaper.new: :$media, :$units, :$margins;
 
+    #=========================
+    # Determine maximum horizontal grid squares for the media type
+    # portrait orientation, and 0l margins.
+    my $max-graph-width  = $p.page-width;
+    my $max-graph-height = $p.page-height;
+    my $max-ncells-x = ($max-graph-width / $p.cell-size).ceiling;
+    my $max-ncells-y = ($max-graph-height / $p.cell-size).ceiling;
+
+    my $ngrids-x = $max-ncells-x div $p.cells-per-grid;
+    my $ngrids-y = $max-ncells-y div $p.cells-per-grid;
+
+    my $graph-size-x = $ngrids-x * $p.cells-per-grid * $p.cell-size;
+    my $graph-size-y = $ngrids-y * $p.cells-per-grid * $p.cell-size;
+
+    my $ncells-x = $ngrids-x * $p.cells-per-grid;
+    my $ncells-y = $ngrids-y * $p.cells-per-grid;
+
+    my $ngrids = $ncells-x * $ncells-y;
+
+    if $debug {
+        say qq:to/HERE/;
+        Given cells of size {$p.cell-size} x {$p.cell-size}, with margins of
+          {$p.margins}, with grids of {$p.cells-per-grid} cells per grid 
+          = $ngrids total grid cells.
+        HERE
+    }
+
+    my $pdf  = PDF::Lite.new;
+    $pdf.media-box = 0, 0, $p.page-width, $p.page-height;
+    my $page = $pdf.add-page;
+
+    # Translate to the lower-left corner of the grid area
+    my $llx = 0 + 0.5 * $p.page-width - 0.5 * $graph-size-x;
+    my $lly = $p.page-height - $graph-size-y;
+    $page.graphics: {
+        .transform: :translate($llx, $lly);
+
+        # draw horizontal lines, $y is varying 0 to $twidth
+        #   bottom to top
+        for 0..$ncells-y -> $i {
+            my $y = $i * $p.cell-size;
+            if not $i mod 10 {
+                .LineWidth = $p.grid-linewidth;
+            }
+            elsif not $i mod 5 {
+                .LineWidth = $p.mid-grid-linewidth;
+            }
+            else {
+                .LineWidth = $p.cell-linewidth;
+            }
+            .MoveTo: 0,             $y;
+            .LineTo: $graph-size-x, $y;
+            .Stroke;
+        }
+        # draw vertical lines, $x is varying 0 to $twidth
+        #   left to right
+        for 0..$ncells-x -> $i {
+            my $x = $i * $p.cell-size;
+            if not $i mod 10 {
+                .LineWidth = $p.grid-linewidth;
+            }
+            elsif not $i mod 5 {
+                .LineWidth = $p.mid-grid-linewidth;
+            }
+            else {
+                .LineWidth = $p.cell-linewidth;
+            }
+            .MoveTo: $x, 0;
+            .LineTo: $x, $graph-size-y;
+            .Stroke;
+        }
+    }
+    $pdf.save-as: $ofil;
     say "See printer test doc: $ofil";
 } # sub make-printer-test-doc
 
@@ -1507,19 +1579,19 @@ our %printers is export = %(
     2 => {
           ofil => "test-gbumc-color.pdf",
           name => "GBUMC Color",
-         }, 
+         },
     3 => {
           ofil => "test-gbz-ups-little-walmart.pdf",
           name => "UPS Store (GBZ, near 'little' Walmart)",
-         }, 
+         },
     4 => {
           ofil => "test-gbz-ups-winn-dixie.pdf",
           name => "UPS Store (near Winn-Dixie)",
-         }, 
+         },
     5 => {
           ofil => "test-office-depot-pcola-airport.pdf",
           name => "Office Depot (near P'cola Airport)",
-         }, 
+         },
 );
 
 sub help() is export {
@@ -1589,7 +1661,7 @@ sub run(@args) is export {
         when /^ (1|2)/ { $method = +$0 }
         when /^ :i d/  { ++$debug }
         when /^ :i g/  { ++$go    }
-        when /^ :i [m \S*]'=' (L|A) /  { 
+        when /^ :i [m \S*]'=' (L|A) /  {
             $media = ~$0;
         }
         when /^ :i 'p=' (\d) $/ {
@@ -1649,10 +1721,10 @@ sub run(@args) is export {
     }
 
     if $ptest {
-        # get the printer name 
+        # get the printer name
         my $name = %printers{$printer}<name>;
         my $ofil = %printers{$printer}<ofil>;
-        make-printer-test-doc $ofil, :$name, :$media;
+        make-printer-test-doc $ofil, :$name, :$media, :$debug;
         exit;
     }
 

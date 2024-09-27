@@ -6,20 +6,35 @@ has $.media = "letter"; # default
 #== defaults for Letter paper
 has $.margins   = 0.4; # * 72;
 has $.cell-size = 0.1; # desired minimum cell size (inches)
+has $.page-width  = 8.5;
+has $.page-height = 11;
 
 my $.cells-per-grid = 10;  # heavier line every X cells
 
-# in PS points
+# standard linewidths in PS points
 my $.cell-linewidth     =  0;    # very fine line
 my $.mid-grid-linewidth =  0.75; # heavier line width (every 5 cells)
 my $.grid-linewidth     =  1.40; # heavier line width (every 10 cells)
 #=========================
 
 submethod TWEAK {
+    # adjust measurements for media type
+    if $!media ~~ /^ :i L/ {
+        ; # no-op for default
+    }
+    if $!media ~~ /^ :i A/ {
+        # A4 dimens in mm: 210 x 297 mm
+        # A4 dimens in cm: 21.0 x 29.7 mm
+        $!page-width  = 21.0; # use cm
+        $!page-height = 29.7; # use cm
+    }
+
     # adjust measurements to PS points
     if $!units    ~~ /^ :i in / {
-        $!margins   *= 72;
-        $!cell-size *= 72;
+        $!margins     *= 72;
+        $!cell-size   *= 72;
+        $!page-width  *= 72;
+        $!page-height *= 72;
     }
     elsif $!units ~~ /^ :i cm / {
         my $cm-per-in = 2.54;
