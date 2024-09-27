@@ -22,7 +22,7 @@ submethod TWEAK {
     if $!media ~~ /^ :i L/ {
         ; # no-op for default
     }
-    if $!media ~~ /^ :i A/ {
+    elsif $!media ~~ /^ :i A/ {
         # A4 dimens in mm: 210 x 297 mm
         # A4 dimens in cm: 21.0 x 29.7 mm
         $!page-width  = 21.0; # use cm

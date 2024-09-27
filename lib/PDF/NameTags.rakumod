@@ -1506,8 +1506,10 @@ sub make-printer-test-doc(
     my $graph-size-x = $ngrids-x * $p.cells-per-grid * $p.cell-size;
     my $graph-size-y = $ngrids-y * $p.cells-per-grid * $p.cell-size;
 
-    my $ncells-x = $ngrids-x * $p.cells-per-grid;
-    my $ncells-y = $ngrids-y * $p.cells-per-grid;
+    #my $ncells-x = $ngrids-x * $p.cells-per-grid;
+    #my $ncells-y = $ngrids-y * $p.cells-per-grid;
+    my $ncells-x = $max-ncells-x; #$ngrids-x * $p.cells-per-grid;
+    my $ncells-y = $max-ncells-y; #$ngrids-y * $p.cells-per-grid;
 
     my $ngrids = $ncells-x * $ncells-y;
 
@@ -1524,13 +1526,13 @@ sub make-printer-test-doc(
     my $page = $pdf.add-page;
 
     # Translate to the lower-left corner of the grid area
-    my $llx = 0 + 0.5 * $p.page-width - 0.5 * $graph-size-x;
+    my $llx = 0;
     my $lly = $p.page-height - $graph-size-y;
     $page.graphics: {
         .transform: :translate($llx, $lly);
 
         # draw horizontal lines, $y is varying 0 to $twidth
-        #   bottom to top
+        #   bottom to top, x: 0, $graph-size-x
         for 0..$ncells-y -> $i {
             my $y = $i * $p.cell-size;
             if not $i mod 10 {
@@ -1547,7 +1549,7 @@ sub make-printer-test-doc(
             .Stroke;
         }
         # draw vertical lines, $x is varying 0 to $twidth
-        #   left to right
+        #   left to right, y: 0, $graph-size-y
         for 0..$ncells-x -> $i {
             my $x = $i * $p.cell-size;
             if not $i mod 10 {
