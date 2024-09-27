@@ -1527,6 +1527,7 @@ sub make-printer-test-doc(
     # Translate to the lower-left corner of the grid area
     my $llx = 0;
     my $lly = $p.page-height - $graph-size-y;
+
     my $g = $page.gfx;
     $g.Save;
 
@@ -1549,6 +1550,7 @@ sub make-printer-test-doc(
         $g.LineTo: $graph-size-x, $y;
         $g.Stroke;
     }
+
     # draw vertical lines, $x is varying 0 to $twidth
     #   left to right, y: 0, $graph-size-y
     for 0..$ncells-x -> $i {
@@ -1575,11 +1577,11 @@ sub make-printer-test-doc(
         $dy = 72; 
         $cx-width  = 6.5 * 72;
         $cy-height = 9.0 * 73;
-
     }
     elsif $p.media ~~ /^ :i A/ {
         die "FATAL: Unable to handle A4 yet";
     }
+    $g.Restore;   
 
     =begin comment
     draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width), 
@@ -1591,7 +1593,6 @@ sub make-printer-test-doc(
     #   arrows and dimension info
     =end comment
 
-    $g.Restore;   
     
     $pdf.save-as: $ofil;
     say "See printer test doc: $ofil";
