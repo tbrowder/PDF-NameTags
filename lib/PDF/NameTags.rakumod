@@ -1507,8 +1507,6 @@ sub make-printer-test-doc(
     my $graph-size-x = $ngrids-x * $p.cells-per-grid * $p.cell-size;
     my $graph-size-y = $ngrids-y * $p.cells-per-grid * $p.cell-size;
 
-    #my $ncells-x = $ngrids-x * $p.cells-per-grid;
-    #my $ncells-y = $ngrids-y * $p.cells-per-grid;
     my $ncells-x = $max-ncells-x; #$ngrids-x * $p.cells-per-grid;
     my $ncells-y = $max-ncells-y; #$ngrids-y * $p.cells-per-grid;
 
@@ -1529,44 +1527,72 @@ sub make-printer-test-doc(
     # Translate to the lower-left corner of the grid area
     my $llx = 0;
     my $lly = $p.page-height - $graph-size-y;
-    $page.graphics: {
-        .transform: :translate($llx, $lly);
+    my $g = $page.gfx;
+    $g.Save;
 
-        # draw horizontal lines, $y is varying 0 to $twidth
-        #   bottom to top, x: 0, $graph-size-x
-        for 0..$ncells-y -> $i {
-            my $y = $i * $p.cell-size;
-            if not $i mod 10 {
-                .LineWidth = $p.grid-linewidth;
-            }
-            elsif not $i mod 5 {
-                .LineWidth = $p.mid-grid-linewidth;
-            }
-            else {
-                .LineWidth = $p.cell-linewidth;
-            }
-            .MoveTo: 0,             $y;
-            .LineTo: $graph-size-x, $y;
-            .Stroke;
+    $g.transform: :translate($llx, $lly);
+
+    # draw horizontal lines, $y is varying 0 to $twidth
+    #   bottom to top, x: 0, $graph-size-x
+    for 0..$ncells-y -> $i {
+        my $y = $i * $p.cell-size;
+        if not $i mod 10 {
+            $g.LineWidth = $p.grid-linewidth;
         }
-        # draw vertical lines, $x is varying 0 to $twidth
-        #   left to right, y: 0, $graph-size-y
-        for 0..$ncells-x -> $i {
-            my $x = $i * $p.cell-size;
-            if not $i mod 10 {
-                .LineWidth = $p.grid-linewidth;
-            }
-            elsif not $i mod 5 {
-                .LineWidth = $p.mid-grid-linewidth;
-            }
-            else {
-                .LineWidth = $p.cell-linewidth;
-            }
-            .MoveTo: $x, 0;
-            .LineTo: $x, $graph-size-y;
-            .Stroke;
+        elsif not $i mod 5 {
+            $g.LineWidth = $p.mid-grid-linewidth;
         }
+        else {
+            $g.LineWidth = $p.cell-linewidth;
+        }
+        $g.MoveTo: 0,             $y;
+        $g.LineTo: $graph-size-x, $y;
+        $g.Stroke;
     }
+    # draw vertical lines, $x is varying 0 to $twidth
+    #   left to right, y: 0, $graph-size-y
+    for 0..$ncells-x -> $i {
+        my $x = $i * $p.cell-size;
+        if not $i mod 10 {
+            $g.LineWidth = $p.grid-linewidth;
+        }
+        elsif not $i mod 5 {
+            $g.LineWidth = $p.mid-grid-linewidth;
+        }
+        else {
+            $g.LineWidth = $p.cell-linewidth;
+        }
+        $g.MoveTo: $x, 0;
+        $g.LineTo: $x, $graph-size-y;
+        $g.Stroke;
+    }
+    
+    # now clip a rectangle inside
+    # ll corner as origin is 1-inch in and up
+    my ($dx, $dy, $cx-width, $cy-height);
+    if $p.media ~~ /^ :i L/ {
+        $dx = 72;
+        $dy = 72; 
+        $cx-width  = 6.5 * 72;
+        $cy-height = 9.0 * 73;
+
+    }
+    elsif $p.media ~~ /^ :i A/ {
+        die "FATAL: Unable to handle A4 yet";
+    }
+
+    =begin comment
+    draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width), 
+                         :height($cy-height), :clip, :$page;
+    draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width), 
+                         :height($cy-height), :fill, :$page;
+    # fill it with:
+    #   printer info
+    #   arrows and dimension info
+    =end comment
+
+    $g.Restore;   
+    
     $pdf.save-as: $ofil;
     say "See printer test doc: $ofil";
 } # sub make-printer-test-doc
