@@ -1469,19 +1469,38 @@ sub write-page-data(
     }
 } #  sub write-page-data(
 
-sub make-printer-test-doc(
+sub make-printer-test(
+    $ofil,
+    PDF::GraphPaper :$description,
+    :$debug,
 ) is export {
     # use basic approach from graph paper
-} # sub make-printer-test-doc
+} # sub make-printer-test
 
 #===== run/help
 # printers
 our %printers is export = %(
-    1 => "Tom's HP",
-    2 => "GBUMC Color",
-    3 => "UPS Store (GBZ, near 'little' Walmart)",
-    4 => "UPS Store (near Winn-Dixie)",
-    5 => "Office Depot (near P'cola Airport)",
+    1 => {
+          ofil => "test-toms-hp.pdf",
+          name => "Tom's HP",
+         },
+
+    2 => {
+          ofil => "test-gbumc-color.pdf",
+          name => "GBUMC Color",
+         }, 
+    3 => {
+          ofil => "test-gbz-ups-little-walmart.pdf",
+          name => "UPS Store (GBZ, near 'little' Walmart)",
+         }, 
+    4 => {
+          ofil => "test-gbz-ups-winn-dixie.pdf",
+          name => "UPS Store (near Winn-Dixie)",
+         }, 
+    5 => {
+          ofil => "test-office-depot-pcola-airport.pdf",
+          name => "Office Depot (near P'cola Airport)",
+         }, 
 );
 
 sub help() is export {
@@ -1503,6 +1522,8 @@ sub help() is export {
                cover sheet.
 
       p=N    - For printer N. See list by number, default: 1 (Tom's HP)
+
+      ptest  - Create a printer test page for the selected printer.
 
     HERE
     exit
@@ -1539,6 +1560,7 @@ sub run(@args) is export {
     my $clip      = 0;
     my $method    = 1;
     my $printer   = 1;
+    my $ptest     = 0;
 
     for @args {
         when /^ :i s/  { ++$show  }
@@ -1552,7 +1574,7 @@ sub run(@args) is export {
                 say "  Known printers:";
                 my @keys = %printers.keys.sort;
                 for @keys -> $k {
-                    my $v =  %printers{$k};
+                    my $v =  %printers{$k}<name>;
                     say "    $k => '$v'";
                 }
                 exit;
@@ -1564,10 +1586,13 @@ sub run(@args) is export {
             say "  For N of known printers:";
             my @keys = %printers.keys.sort;
             for @keys -> $k {
-                my $v =  %printers{$k};
+                my $v =  %printers{$k}<name>;
                 say "    $k => '$v'";
             }
             exit;
+        }
+        when /^ :i [pt|pte|ptes|ptest] $/ {
+            $ptest = 1;
         }
         default {
             say "Unknown arg '$_'...exiting.";
@@ -1597,6 +1622,15 @@ sub run(@args) is export {
         say " Total badges: {$nc*$nr}";
         exit;
     }
+
+    if $ptest {
+        # get the printer name 
+        my $pnam = %printers{$printer}<name>;
+        my $ofil = %printers{$printer}<ofil>;
+        make-printer-test
+        exit;
+    }
+
 
     # cols 2, rows 4, total 8, portrait
     my @n = @names; # sample name "Mary Ann Deaver"
