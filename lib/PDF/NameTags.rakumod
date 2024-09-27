@@ -1469,13 +1469,32 @@ sub write-page-data(
     }
 } #  sub write-page-data(
 
-sub make-printer-test(
+sub make-printer-test-doc(
     $ofil,
-    PDF::GraphPaper :$description,
+    :$name!,
+    :$media!,
     :$debug,
 ) is export {
     # use basic approach from graph paper
-} # sub make-printer-test
+    my $margins = 0;
+    my $units;
+    if $media ~~ /^ :i L/ {
+        $units = "in";
+    }
+    elsif $media ~~ /^ :i A/ {
+        $units = "cn";
+    }
+    else {
+        die qq:to/HERE/;
+        FATAL: Unexpected media name: '$media'.
+               Only 'Letter' and 'A4' are currently handled.
+               
+        HERE
+    }
+    my $p = PDF::GraphPaper.new: :$media, :$units; 
+
+    say "See printer test doc: $ofil";
+} # sub make-printer-test-doc
 
 #===== run/help
 # printers
@@ -1513,17 +1532,19 @@ sub help() is export {
       job details (and the back side will be blank).
 
     Options:
-      1|2    - Select option 1 (original method) or 2
+      1|2     - Select option 1 (original method) or 2
                  (XForm object method), default: 1.
 
-      show   - Gives details of the job based on the input name
-               list and card dimension parameters, then exits.
-               The information is the same as on the printed job
-               cover sheet.
+      show    - Gives details of the job based on the input name
+                list and card dimension parameters, then exits.
+                The information is the same as on the printed job
+                cover sheet.
 
-      p=N    - For printer N. See list by number, default: 1 (Tom's HP)
+      p=N     - For printer N. See list by number, default: 1 (Tom's HP)
 
-      ptest  - Create a printer test page for the selected printer.
+      ptest   - Create a printer test page for the selected printer.
+
+      media=X - Where X is Letter or A4, default: Letter
 
     HERE
     exit
@@ -1561,12 +1582,16 @@ sub run(@args) is export {
     my $method    = 1;
     my $printer   = 1;
     my $ptest     = 0;
+    my $media     = "Letter";
 
     for @args {
         when /^ :i s/  { ++$show  }
         when /^ (1|2)/ { $method = +$0 }
         when /^ :i d/  { ++$debug }
         when /^ :i g/  { ++$go    }
+        when /^ :i [m \S*]'=' (L|A) /  { 
+            $media = ~$0;
+        }
         when /^ :i 'p=' (\d) $/ {
             my $pnum = +$0;
             unless %printers{$pnum}:exists {
@@ -1625,9 +1650,9 @@ sub run(@args) is export {
 
     if $ptest {
         # get the printer name 
-        my $pnam = %printers{$printer}<name>;
+        my $name = %printers{$printer}<name>;
         my $ofil = %printers{$printer}<ofil>;
-        make-printer-test
+        make-printer-test-doc $ofil, :$name, :$media;
         exit;
     }
 
