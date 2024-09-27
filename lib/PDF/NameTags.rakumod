@@ -1497,11 +1497,12 @@ sub make-printer-test-doc(
     # portrait orientation, and 0l margins.
     my $max-graph-width  = $p.page-width;
     my $max-graph-height = $p.page-height;
+
     my $max-ncells-x = ($max-graph-width / $p.cell-size).ceiling;
     my $max-ncells-y = ($max-graph-height / $p.cell-size).ceiling;
 
-    my $ngrids-x = $max-ncells-x div $p.cells-per-grid;
-    my $ngrids-y = $max-ncells-y div $p.cells-per-grid;
+    my $ngrids-x = ($max-ncells-x / $p.cells-per-grid).ceiling;
+    my $ngrids-y = ($max-ncells-y / $p.cells-per-grid).ceiling;
 
     my $graph-size-x = $ngrids-x * $p.cells-per-grid * $p.cell-size;
     my $graph-size-y = $ngrids-y * $p.cells-per-grid * $p.cell-size;
