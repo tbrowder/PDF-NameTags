@@ -1581,7 +1581,6 @@ sub make-printer-test-doc(
     elsif $p.media ~~ /^ :i A/ {
         die "FATAL: Unable to handle A4 yet";
     }
-    $g.Restore;   
 
     =begin comment
     draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width), 
@@ -1593,6 +1592,7 @@ sub make-printer-test-doc(
     #   arrows and dimension info
     =end comment
 
+    $g.Restore;   
     
     $pdf.save-as: $ofil;
     say "See printer test doc: $ofil";
