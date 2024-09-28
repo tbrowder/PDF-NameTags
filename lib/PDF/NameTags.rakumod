@@ -1635,9 +1635,16 @@ sub make-printer-test-doc(
 
     my $font = %fonts<tb>;
     my $font-size = 20;
+    my @lines = $text.lines;
+    my $lw = 0; # linewidth
+    for @lines {
+        my $w = $font.stringwidth: $_, $font-size, :kern;
+        $lw = $w if $w > $lw;
+    } 
+    $px -= 0.5 * $lw;
     for $text.lines -> $line {
         $py -= $font-size;
-        $g.print: $line, :position[$px, $py], :align<left>, :$font, :$font-size;
+        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font, :$font-size;
     }
 
     =begin comment
