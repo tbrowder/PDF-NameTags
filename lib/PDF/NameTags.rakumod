@@ -1,4 +1,4 @@
-unit module PDF::NameTags;
+unit modute PDF::NameTags;
 
 use PDF::API6;
 use PDF::Lite;
@@ -1498,10 +1498,15 @@ sub write-page-data(
     }
 } #  sub write-page-data(
 
+
 sub make-printer-test-doc(
+} # sub make-printer-test-doc(
+sub make-printer-test-page(
     $ofil,
     :$name!,
     :$media!,
+    :$page!,
+    :$obverse = 1, # front side
     :$debug,
 ) is export {
 
@@ -1551,9 +1556,11 @@ sub make-printer-test-doc(
         HERE
     }
 
+    =begin comment
     my $pdf  = PDF::Lite.new;
     $pdf.media-box = 0, 0, $p.page-width, $p.page-height;
     my $page = $pdf.add-page;
+    =end comment
 
     # Translate to the lower-left corner of the grid area
     my $llx = 0;
@@ -1624,9 +1631,16 @@ sub make-printer-test-doc(
     #   printer info
     #   arrows and dimension info
     =end comment
+    my $otextO = "Duplexer page front side (obverse)";
+    my $otextR = "Duplexer page backbside (reverse)";
+    my $otext = $otextO;
+    if not $obverse {
+        $otext = $otextR;   
+    }
     my $text = qq:to/HERE/;
     Printer: $name
     Media:   $media
+
     HERE
 
     # print that as a text box 3/4 from bottom
@@ -1644,8 +1658,15 @@ sub make-printer-test-doc(
     $px -= 0.5 * $lw;
     for $text.lines -> $line {
         $py -= $font-size;
-        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font, :$font-size;
+        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font, 
+                  :$font-size;
     }
+
+    # print the page position info centered but 100 points lower
+    $py -= 100;
+    $lw = $font.stringwidth: $otext, $font-size, :kern;
+    $g.print: $otext, :kern, :position[$px, $py], :align<center>, :$font, 
+                  :$font-size;
 
     =begin comment
     my @tbox = $g.print: $text, :align<center>, :valign<center>, 
@@ -1654,9 +1675,9 @@ sub make-printer-test-doc(
 
     $g.Restore;
 
-    $pdf.save-as: $ofil;
-    say "See printer test doc: $ofil";
-} # sub make-printer-test-doc
+    #$pdf.save-as: $ofil;
+    #say "See printer test doc: $ofil";
+} # sub make-printer-test-page
 
 #===== run/help
 # printers
@@ -1814,10 +1835,11 @@ sub run(@args) is export {
         # get the printer name
         my $name = %printers{$printer}<name>;
         my $ofil = %printers{$printer}<ofil>;
-        make-printer-test-doc $ofil, :$name, :$media, :$debug;
+        # get graph paper specs
+        my $graphpaper = PDF::GraphPaper.new: :media<Letter>, :$units, :margins(0);
+        make-printer-test-doc $ofil, :$name, :$graphpaper, :$debug;
         exit;
     }
-
 
     # cols 2, rows 4, total 8, portrait
     my @n = @names; # sample name "Mary Ann Deaver"
