@@ -1624,7 +1624,7 @@ sub make-printer-test-doc(
     #   printer info
     #   arrows and dimension info
     =end comment
-    my $info = qq:to/HERE/;
+    my $text = qq:to/HERE/;
     Printer: $name
     Media:   $media
     HERE
@@ -1635,8 +1635,16 @@ sub make-printer-test-doc(
 
     my $font = %fonts<tb>;
     my $font-size = 20;
-    my @tbox = $g.print: $info, :align<center>, :valign<center>, 
+    for $text.lines -> $line {
+        $py -= $font-size;
+        $g.print: $line, :position[$px, $py], :align<left>, :$font, :$font-size;
+    }
+
+    =begin comment
+    my @tbox = $g.print: $text, :align<center>, :valign<center>, 
                                 :position[$px, $py], :$font, :$font-size;
+    =end comment
+
     $g.Restore;
 
     $pdf.save-as: $ofil;
