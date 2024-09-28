@@ -6,6 +6,7 @@
   "build-depends": [
   ],
   "depends": [
+    "MacOS::NativeLib",
     "File::Temp",
     "QueryOS",
     "Compress::PDF",

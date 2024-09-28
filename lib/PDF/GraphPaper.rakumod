@@ -1,4 +1,4 @@
-unit class PDF::GraphPaper is export;
+unit class PDF::GraphPaper;
 
 has $.units = "in";     # default
 has $.media = "letter"; # default

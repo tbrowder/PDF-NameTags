@@ -1,4 +1,4 @@
-unit modute PDF::NameTags;
+unit module PDF::NameTags;
 
 use PDF::API6;
 use PDF::Lite;
@@ -1500,34 +1500,83 @@ sub write-page-data(
 
 
 sub make-printer-test-doc(
-} # sub make-printer-test-doc(
-sub make-printer-test-page(
     $ofil,
-    :$name!,
-    :$media!,
-    :$page!,
-    :$obverse = 1, # front side
+    :$name!,            # printer name data
+    :$media! is copy,
     :$debug,
 ) is export {
 
-    # use basic approach from graph paper
-    my $margins = 0;
-    my $units;
     if $media ~~ /^ :i L/ {
-        $units = "in";
+        $media = "Letter";
     }
-    elsif $media ~~ /^ :i A/ {
-        $units = "cm";
+    elsif $media ~~ /^ :i A4/ {
+        $media = "A4";
     }
     else {
-        die qq:to/HERE/;
-        FATAL: Unexpected media name: '$media'.
-               Only 'Letter' and 'A4' are currently handled.
-
-        HERE
+        die "FATAL: Unhandled media '$media', file an issue for a new media type";
     }
-    my $p = PDF::GraphPaper.new: :$media, :$units, :$margins;
 
+    my ($page);
+
+    my $gp = PDF::GraphPaper.new: :$media, :margins(0);
+
+    my $pdf  = PDF::Lite.new;
+    $pdf.media-box = 0, 0, $gp.page-width, $gp.page-height;
+
+
+    # front page
+    $page = $pdf.add-page;
+    make-printer-test-page $ofil, :$name, :$page, :obverse(1),
+                           :graph-paper($gp), :$debug;
+
+    # back page
+    $page = $pdf.add-page;
+    make-printer-test-page $ofil, :$name, :$page, :obverse(0),
+                           :graph-paper($gp), :$debug;
+
+    $pdf.save-as: $ofil;
+    say "See printer test doc: $ofil";
+
+} # sub make-printer-test-doc(
+
+sub make-printer-test-page(
+    $ofil,
+    :$name!,
+    :$graph-paper!,
+    :$page!,
+    :$obverse!, # front = 1, 0 = back
+    :$debug,
+) is export {
+
+    # text chunks to go on each page
+    # make as constants later (better yet, constant hash 
+    # objects with font info, etc.)
+
+    # center this chunk
+    my $chunk1 = qq:to/HERE/;
+    Printer Test Page
+
+    for printer
+
+    '$name'
+
+    
+    Instructions
+    HERE
+
+    # center this block on its longest line
+    # this really ought to be a TextBox later
+    my $chunk2 = qq:to/HERE/;
+    The following settings are often the defaults, but
+    please ensure they are correct or the output cannot 
+    be used for the proper creation of two-sided name 
+    tags.
+    HERE
+
+    my PDF::Content::Text::Box $tbox .= new: 
+                                     :text($chunk2), :font(%fonts<t>), :font-size(12);
+
+    my $p = $graph-paper;
     #=========================
     # Determine maximum horizontal grid squares for the media type
     # portrait orientation, and 0l margins.
@@ -1555,12 +1604,6 @@ sub make-printer-test-page(
           = $ngrids total grid cells.
         HERE
     }
-
-    =begin comment
-    my $pdf  = PDF::Lite.new;
-    $pdf.media-box = 0, 0, $p.page-width, $p.page-height;
-    my $page = $pdf.add-page;
-    =end comment
 
     # Translate to the lower-left corner of the grid area
     my $llx = 0;
@@ -1631,15 +1674,23 @@ sub make-printer-test-page(
     #   printer info
     #   arrows and dimension info
     =end comment
+
     my $otextO = "Duplexer page front side (obverse)";
-    my $otextR = "Duplexer page backbside (reverse)";
+    my $otextR = "Duplexer page back side (reverse)";
     my $otext = $otextO;
     if not $obverse {
-        $otext = $otextR;   
+        $otext = $otextR;
     }
+
+    my $instructions = qq:to/HERE/;
+    1. Do not use scaling (or set scaling = 100\%).
+    2. Select two-sided printing (flip on long side).
+    3. Select 'Portrait' orientation.
+    HERE
+
     my $text = qq:to/HERE/;
     Printer: $name
-    Media:   $media
+    Media:   {$p.media}
 
     HERE
 
@@ -1654,29 +1705,39 @@ sub make-printer-test-page(
     for @lines {
         my $w = $font.stringwidth: $_, $font-size, :kern;
         $lw = $w if $w > $lw;
-    } 
+    }
     $px -= 0.5 * $lw;
     for $text.lines -> $line {
         $py -= $font-size;
-        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font, 
+        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font,
                   :$font-size;
     }
 
     # print the page position info centered but 100 points lower
     $py -= 100;
-    $lw = $font.stringwidth: $otext, $font-size, :kern;
-    $g.print: $otext, :kern, :position[$px, $py], :align<center>, :$font, 
-                  :$font-size;
+    $px = 0.5 * $p.page-width;
+    $g.print: $otext, :kern, :position[$px, $py], :align<center>, :$font,
+              :$font-size;
+
+    # and the page number
+    my ($page-number);
+    if $obverse == 1 {
+        $page-number = "Page 1";
+    }
+    else {
+        $page-number = "Page 2";
+    }
+    $py = 0 + 100;
+    $g.print: $page-number, :kern, :position[$px, $py], :align<center>, :$font,
+              :font-size(15);
 
     =begin comment
-    my @tbox = $g.print: $text, :align<center>, :valign<center>, 
+    my @tbox = $g.print: $text, :align<center>, :valign<center>,
                                 :position[$px, $py], :$font, :$font-size;
     =end comment
 
     $g.Restore;
 
-    #$pdf.save-as: $ofil;
-    #say "See printer test doc: $ofil";
 } # sub make-printer-test-page
 
 #===== run/help
@@ -1835,9 +1896,7 @@ sub run(@args) is export {
         # get the printer name
         my $name = %printers{$printer}<name>;
         my $ofil = %printers{$printer}<ofil>;
-        # get graph paper specs
-        my $graphpaper = PDF::GraphPaper.new: :media<Letter>, :$units, :margins(0);
-        make-printer-test-doc $ofil, :$name, :$graphpaper, :$debug;
+        make-printer-test-doc $ofil, :$name, :$media, :$debug;
         exit;
     }
 
