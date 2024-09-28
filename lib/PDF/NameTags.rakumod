@@ -1560,7 +1560,6 @@ sub make-printer-test-page(
 
     '$name'
 
-    
     Instructions
     HERE
 
@@ -1574,7 +1573,11 @@ sub make-printer-test-page(
     HERE
 
     my PDF::Content::Text::Box $tbox .= new: 
-                                     :text($chunk2), :font(%fonts<t>), :font-size(12);
+        :text($chunk2), :font(%fonts<t>), :font-size(12);
+    $page.text: {
+        .text-position = 10,20;
+        .print: $tbox;
+    }
 
     my $p = $graph-paper;
     #=========================
