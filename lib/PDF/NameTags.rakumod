@@ -1607,7 +1607,7 @@ sub make-printer-test-doc(
         $dx = 72;
         $dy = 72;
         $cx-width  = 6.5 * 72;
-        $cy-height = 9.0 * 73;
+        $cy-height = 9.0 * 72;
     }
     elsif $p.media ~~ /^ :i A/ {
         die "FATAL: Unable to handle A4 yet";
