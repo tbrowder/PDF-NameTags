@@ -1613,8 +1613,10 @@ sub make-printer-test-doc(
         die "FATAL: Unable to handle A4 yet";
     }
 
+    # clip it
     draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width),
                          :height($cy-height), :clip, :$page;
+    # draw it
     draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width),
                          :height($cy-height), :fill, :$page;
     =begin comment
@@ -1622,7 +1624,19 @@ sub make-printer-test-doc(
     #   printer info
     #   arrows and dimension info
     =end comment
+    my $info = qq:to/HERE/;
+    Printer: $name
+    Media:   $media
+    HERE
 
+    # print that as a text box 3/4 from bottom
+    my $px = 0.5  * $p.page-width;
+    my $py = 0.75 * $p.page-height;
+
+    my $font = %fonts<tb>;
+    my $font-size = 20;
+    my @tbox = $g.print: $info, :align<center>, :valign<center>, 
+                                :position[$px, $py], :$font, :$font-size;
     $g.Restore;
 
     $pdf.save-as: $ofil;
