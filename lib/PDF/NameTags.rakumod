@@ -576,6 +576,7 @@ sub draw-circle-clip(
     $clip   = 0 if not $clip.defined;
     # what if none are defined?
     if $clip {
+        # MUST NOT TRANSFORM OR TRANSLATE
         # illegal to do anything else with current state of PDF::Content
         ($fill, $stroke) = 0, 0;
     }
@@ -600,21 +601,18 @@ sub draw-circle-clip(
         }
     }
 
-    #my $g = $gfx ?? $gfx !! $page.gfx;
     my $g = $page.gfx;
-    $g.Save if not $clip;
+    $g.Save if not $clip; # CRITICAL
 
     if not $clip {
-        $g.SetLineWidth: $linewidth; #, :$color;
+        $g.SetLineWidth: $linewidth;
         $g.StrokeColor = $stroke-color;
-        $g.FillColor   = $fill-color; # $fill-color;
-        #$g.transform: :translate($x, $y);
-        #$g.MoveTo: 0*$r, 1*$r; # top of the circle
+        $g.FillColor   = $fill-color;
     }
-    else {
-    }
+
     constant k = 0.551_785; #_777_790_14;
 
+    # draw the path
     $g.MoveTo: $x+(0*$r), $y+(1*$r); # top of the circle
     # use four curves, counter-clockwise
     # upper-left arc
@@ -830,20 +828,22 @@ sub draw-rectangle-clip(
     :$lly!,
     :$width!,
     :$height!,
+    :$page!,
     :$stroke-color = (color Black),
     :$fill-color   = (color White),
+    :$linewidth = 0,
     :$fill is copy,
     :$stroke is copy,
     :$clip is copy,
-    :$page!,
+    :$debug,
     ) is export {
 
-    $stroke = 0 if not $stroke.defined;
     $fill   = 0 if not $fill.defined;
+    $stroke = 0 if not $stroke.defined;
     $clip   = 0 if not $clip.defined;
     # what if none are defined?
     if $clip {
-        # illegal to do anything else with current state of PDF::Content
+        # MUST NOT TRANSFORM OR TRANSLATE
         ($fill, $stroke) = 0, 0;
     }
     else {
@@ -851,29 +851,60 @@ sub draw-rectangle-clip(
         $stroke = 1 if not ($fill or $stroke);
     }
 
-    #$page.graphics: {
+    if $debug {
+        say "   Drawing a circle...";
+        if $fill {
+            say "     Filling with color $fill-color...";
+        }
+        if $stroke {
+            say "     Stroking with color $stroke-color...";
+        }
+        if $clip {
+            say "     Clipping the circle";
+        }
+        else {
+            say "     NOT clipping the circle";
+        }
+    }
+
+
     my $g = $page.gfx;
-    $g.Save;
+    $g.Save if not $clip; # CRITICAL
     # NO translation
-    $g.FillColor = color $fill-color;
-    $g.StrokeColor = color $stroke-color;
-    $g.LineWidth = 0;
+
+    if not $clip {
+        $g.SetLineWidth: $linewidth;
+        $g.StrokeColor = $stroke-color;
+        $g.FillColor   = $fill-color;
+    }
+
+    # draw the path
     $g.MoveTo: $llx, $lly;
     $g.LineTo: $llx+$width, $lly;
     $g.LineTo: $llx+$width, $lly+$height;
     $g.LineTo: $llx       , $lly+$height;
     $g.ClosePath;
 
-    if $fill and $stroke {
-        $g.FillStroke;
+    if not $clip {
+        if $fill and $stroke {
+            $g.FillStroke;
+        }
+        elsif $fill {
+            $g.Fill;
+        }
+        elsif $stroke {
+            $g.Stroke;
+        }
+        else {
+            die "FATAL: Unknown drawing status";
+        }
+
+        $g.Restore;
     }
-    elsif $fill {
-        $g.Fill;
+    else {
+        $g.Clip;
+        $g.EndPath;
     }
-    elsif $stroke {
-        $g.Stroke;
-    }
-    $g.Restore;
 
 } # sub draw-rectangle(
 
@@ -1515,7 +1546,7 @@ sub make-printer-test-doc(
     if $debug {
         say qq:to/HERE/;
         Given cells of size {$p.cell-size} x {$p.cell-size}, with margins of
-          {$p.margins}, with grids of {$p.cells-per-grid} cells per grid 
+          {$p.margins}, with grids of {$p.cells-per-grid} cells per grid
           = $ngrids total grid cells.
         HERE
     }
@@ -1568,13 +1599,13 @@ sub make-printer-test-doc(
         $g.LineTo: $x, $graph-size-y;
         $g.Stroke;
     }
-    
+
     # now clip a rectangle inside
     # ll corner as origin is 1-inch in and up
     my ($dx, $dy, $cx-width, $cy-height);
     if $p.media ~~ /^ :i L/ {
         $dx = 72;
-        $dy = 72; 
+        $dy = 72;
         $cx-width  = 6.5 * 72;
         $cy-height = 9.0 * 73;
     }
@@ -1582,18 +1613,18 @@ sub make-printer-test-doc(
         die "FATAL: Unable to handle A4 yet";
     }
 
-    =begin comment
-    draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width), 
+    draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width),
                          :height($cy-height), :clip, :$page;
-    draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width), 
+    draw-rectangle-clip  :llx($dx), :lly($dy), :width($cx-width),
                          :height($cy-height), :fill, :$page;
+    =begin comment
     # fill it with:
     #   printer info
     #   arrows and dimension info
     =end comment
 
-    $g.Restore;   
-    
+    $g.Restore;
+
     $pdf.save-as: $ofil;
     say "See printer test doc: $ofil";
 } # sub make-printer-test-doc
