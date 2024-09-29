@@ -1,5 +1,6 @@
 unit module PDF::NameTags;
 
+use MacOS::NativeLib "*";
 use PDF::API6;
 use PDF::Lite;
 use PDF::Content::Color :ColorName, :color;
