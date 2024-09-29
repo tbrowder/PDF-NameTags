@@ -1548,6 +1548,8 @@ sub make-printer-test-page(
     :$debug,
 ) is export {
 
+    my $p = $graph-paper;
+
     # text chunks to go on each page
     # make as constants later (better yet, constant hash 
     # objects with font info, etc.)
@@ -1567,19 +1569,16 @@ sub make-printer-test-page(
     # this really ought to be a TextBox later
     my $chunk2 = qq:to/HERE/;
     The following settings are often the defaults, but
-    please ensure they are correct or the output cannot 
+    please ensure they are correct, or the output cannot 
     be used for the proper creation of two-sided name 
     tags.
     HERE
 
+    my $box-width = $p.page-width * 0.6;
     my PDF::Content::Text::Box $tbox .= new: 
-        :text($chunk2), :font(%fonts<t>), :font-size(12);
-    $page.text: {
-        .text-position = 10,20;
-        .print: $tbox;
-    }
-
-    my $p = $graph-paper;
+        :text($chunk2), :font(%fonts<t>), :font-size(12), :kern,
+        :align<left>, :width($box-width);
+    
     #=========================
     # Determine maximum horizontal grid squares for the media type
     # portrait orientation, and 0l margins.
@@ -1685,11 +1684,15 @@ sub make-printer-test-page(
         $otext = $otextR;
     }
 
-    my $instructions = qq:to/HERE/;
+    my $howto = qq:to/HERE/;
     1. Do not use scaling (or set scaling = 100\%).
     2. Select two-sided printing (flip on long side).
     3. Select 'Portrait' orientation.
     HERE
+
+    my PDF::Content::Text::Box $tbox2 .= new: 
+        :text($howto), :font(%fonts<t>), :font-size(12), :kern,
+        :align<left>, :width($box-width);
 
     my $text = qq:to/HERE/;
     Printer: $name
@@ -1733,6 +1736,12 @@ sub make-printer-test-page(
     $py = 0 + 100;
     $g.print: $page-number, :kern, :position[$px, $py], :align<center>, :$font,
               :font-size(15);
+
+    $page.text: {
+        my $lx = 0.5 * ($p.page-width - $tbox.content-width); 
+        .text-position = $lx, $p.page-height * 0.7;
+        .print: $tbox;
+    }
 
     =begin comment
     my @tbox = $g.print: $text, :align<center>, :valign<center>,
@@ -1941,3 +1950,14 @@ sub run(@args) is export {
     say "See name tags file: $ofile (using \$method $method)";
 
 } # sub run(@args) is export
+
+sub get-list-width(
+    @text, 
+    :$font, 
+    :$font-size, 
+    :$debug,
+    --> List
+    ) is export {
+
+} # get-list-width
+
