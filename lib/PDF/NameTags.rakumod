@@ -12,6 +12,7 @@ use Compress::PDF;
 
 use PDF::GraphPaper;
 use PDF::NameTags::FreeFonts;
+use PDF::NameTags::Subs;
 
 # My initial guess at the rose window colors (rgb triplets)
 # based on my comparing the image on the church website
@@ -47,7 +48,9 @@ my $ph = 11*72;
 # current badge dimensions (width, height)
 my @badge = 3.84, 2.26; # Amazon, 0.1" less than listed dimensions to allow in-pocket
 # still too wide, trim another 1/8" of width
+# TODO tweak badge dimensions a bit narrower
 @badge[0] -= 0.125;
+
 
 my $bwi = @badge.head; # badge width
 my $bhi = @badge.tail; # badge height
@@ -103,7 +106,7 @@ sub make-badge-page(
     :$page-num!,
     :$project-dir!,
     :$method!,
-    :$printer!,
+    :$printer-num!,
     :$debug,
 ) is export {
     my @r = @p;
@@ -155,7 +158,7 @@ sub make-badge-page(
             my $cx-gutter = $hmid1 + 0.5 * ($hmid2 - $hmid1);
             my $cy-gutter = 0.5 * $ph;
 
-            write-page-data :$printer, :cx($cx-gutter), :cy($cy-gutter), :$side,
+            write-page-data :$printer-num, :cx($cx-gutter), :cy($cy-gutter), :$side,
                                        :$page, :$debug;
         }
 
@@ -1309,6 +1312,7 @@ our %eg-names is export = %(
     2 => "star-and-circle",
     3 => "plain-circle",
 );
+
 sub get-base-name(UInt $N --> Str) is export {
     my $base-name = "example" ~ $N.Str;
     # given an example number, determine a name
@@ -1480,7 +1484,7 @@ sub place-image(
 } # sub place-image(
 
 sub write-page-data(
-    :$printer,
+    :$printer-name,
     :$cx!,
     :$cy!,
     :$side!,
@@ -1495,7 +1499,7 @@ sub write-page-data(
         .FillColor = color Black; #rgb(0, 0, 0); # color Black
         .font = %fonts<h>, #.core-font('HelveticaBold'),
                  9; # the size
-        .print: "$printer ($side)", :align<center>, :valign<center>;
+        .print: "$printer-name ($side)", :align<center>, :valign<center>;
     }
 } #  sub write-page-data(
 
@@ -1552,34 +1556,31 @@ sub make-printer-test-page(
     my $p = $graph-paper;
 
     # text chunks to go on each page
-    # make as constants later (better yet, constant hash 
-    # objects with font info, etc.)
+    # make as constants later (better yet, constant hash
+    # objects with font info, etc., in another module)
 
-    # center this chunk
-    my $chunk1 = qq:to/HERE/;
-    Printer Test Page
+    my $para-width = $p.page-width * 0.6;
 
-    for printer
+    # a reusable text box:  with filled text
+    my PDF::Content::Text::Box $para .= new:
+        :text(""),
+        :font(%fonts<t>), :font-size(12), :kern, # <== note font information is rw
+        :align<left>, :width($para-width);
 
-    '$name'
+    # a reusable text box:  lines preserved and text centered
+    my PDF::Content::Text::Box $lines-centered .= new:
+        :text(""),
+        :font(%fonts<tb>), :font-size(15), :kern, # <== note font information is rw
+        :verbatim, :squish,
+        :align<center>, :width($para-width);
 
-    Instructions
-    HERE
+    # a reusable text box: lines preserved and text aligned left
+    my PDF::Content::Text::Box $lines-left .= new:
+        :text(""),
+        :font(%fonts<tb>), :font-size(15), :kern, # <== note font information is rw
+        :verbatim, :squish,
+        :align<left>, :width($para-width);
 
-    # center this block on its longest line
-    # this really ought to be a TextBox later
-    my $chunk2 = qq:to/HERE/;
-    The following settings are often the defaults, but
-    please ensure they are correct, or the output cannot 
-    be used for the proper creation of two-sided name 
-    tags.
-    HERE
-
-    my $box-width = $p.page-width * 0.6;
-    my PDF::Content::Text::Box $tbox .= new: 
-        :text($chunk2), :font(%fonts<t>), :font-size(12), :kern,
-        :align<left>, :width($box-width);
-    
     #=========================
     # Determine maximum horizontal grid squares for the media type
     # portrait orientation, and 0l margins.
@@ -1678,47 +1679,39 @@ sub make-printer-test-page(
     #   arrows and dimension info
     =end comment
 
-    my $otextO = "Duplexer page front side (obverse)";
-    my $otextR = "Duplexer page back side (reverse)";
-    my $otext = $otextO;
-    if not $obverse {
-        $otext = $otextR;
+    my %text-chunks = get-text-chunks :$name, :media($p.media);
+
+    $lines-centered.text = %text-chunks<1><text>; # $howto;
+    #     printer. etc.
+    #     instructions
+    $page.text: {
+        my $lx = 0.5 * ($p.page-width); # - $lines-centered.content-width);
+        .text-position = $lx, $p.page-height * 0.8;
+        $lines-centered.render: $g;
     }
 
-    my $howto = qq:to/HERE/;
-    1. Do not use scaling (or set scaling = 100\%).
-    2. Select two-sided printing (flip on long side).
-    3. Select 'Portrait' orientation.
-    HERE
+    # the instructions
+    $lines-left.text = %text-chunks<3><text>; # $howto;
+    $page.text: {
+        my $lx = 0.5 * ($p.page-width - $lines-left.content-width);
+        .text-position = $lx, $p.page-height * 0.67;
+        $lines-left.render: $g;
+    }
 
-    my PDF::Content::Text::Box $tbox2 .= new: 
-        :text($howto), :font(%fonts<t>), :font-size(12), :kern,
-        :align<left>, :width($box-width);
-
-    my $text = qq:to/HERE/;
-    Printer: $name
-    Media:   {$p.media}
-
-    HERE
-
+    my $otext;
+    if $obverse == 1 {
+        $otext = "Duplexer page front side (obverse)";
+    }
+    else {
+        $otext = "Duplexer page back side (reverse)";
+    }
     # print that as a text box 3/4 from bottom
     my $px = 0.5  * $p.page-width;
-    my $py = 0.75 * $p.page-height;
-
+    my $py = 0.6 * $p.page-height;
     my $font = %fonts<tb>;
     my $font-size = 20;
-    my @lines = $text.lines;
+    my @lines = $lines-left.text.lines;
     my $lw = 0; # linewidth
-    for @lines {
-        my $w = $font.stringwidth: $_, $font-size, :kern;
-        $lw = $w if $w > $lw;
-    }
-    $px -= 0.5 * $lw;
-    for $text.lines -> $line {
-        $py -= $font-size;
-        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font,
-                  :$font-size;
-    }
 
     # print the page position info centered but 100 points lower
     $py -= 100;
@@ -1729,25 +1722,22 @@ sub make-printer-test-page(
     # and the page number
     my ($page-number);
     if $obverse == 1 {
-        $page-number = "Page 1";
+        $page-number = "Page 1 of 2";
     }
     else {
-        $page-number = "Page 2";
+        $page-number = "Page 2 of 2";
     }
     $py = 0 + 100;
-    $g.print: $page-number, :kern, :position[$px, $py], :align<center>, :$font,
+    $px = $p.page-width - 100;
+    $font = %fonts<t>;
+    $g.print: $page-number, :kern, :position[$px, $py], :align<right>, :$font,
               :font-size(15);
 
     $page.text: {
-        my $lx = 0.5 * ($p.page-width - $tbox.content-width); 
+        my $lx = 0.5 * ($p.page-width - $para.content-width);
         .text-position = $lx, $p.page-height * 0.7;
-        .print: $tbox;
+        .print: $para;
     }
-
-    =begin comment
-    my @tbox = $g.print: $text, :align<center>, :valign<center>,
-                                :position[$px, $py], :$font, :$font-size;
-    =end comment
 
     $g.Restore;
 
@@ -1837,7 +1827,7 @@ sub run(@args) is export {
     my $go        = 0;
     my $clip      = 0;
     my $method    = 1;
-    my $printer   = 1;
+    my $printer-num = 1;
     my $ptest     = 0;
     my $media     = "Letter";
 
@@ -1850,9 +1840,9 @@ sub run(@args) is export {
             $media = ~$0;
         }
         when /^ :i 'p=' (\d) $/ {
-            my $pnum = +$0;
-            unless %printers{$pnum}:exists {
-                say "WARNING: Unknown printer number $pnum.";
+            $printer-num = +$0;
+            unless %printers{$printer-num}:exists {
+                say "WARNING: Unknown printer number $printer-num.";
                 say "  Known printers:";
                 my @keys = %printers.keys.sort;
                 for @keys -> $k {
@@ -1861,7 +1851,7 @@ sub run(@args) is export {
                 }
                 exit;
             }
-            $printer = %printers{$pnum};
+            say "Printer number $printer-num was selected";
         }
         when /^ :i p $/ {
             say "WARNING: No printer was selected. Use 'p=N'.";
@@ -1880,6 +1870,16 @@ sub run(@args) is export {
             say "Unknown arg '$_'...exiting.";
             exit;
         }
+    }
+
+    if $ptest {
+        # get the printer name
+        my $name = %printers{$printer-num}<name>;
+        my $ofil = %printers{$printer-num}<ofil>;
+        say "printer name = $name";
+
+        make-printer-test-doc $ofil, :$name, :$media, :$debug;
+        exit;
     }
 
     if $show {
@@ -1905,14 +1905,6 @@ sub run(@args) is export {
         exit;
     }
 
-    if $ptest {
-        # get the printer name
-        my $name = %printers{$printer}<name>;
-        my $ofil = %printers{$printer}<ofil>;
-        make-printer-test-doc $ofil, :$name, :$media, :$debug;
-        exit;
-    }
-
     # cols 2, rows 4, total 8, portrait
     my @n = @names; # sample name "Mary Ann Deaver"
 
@@ -1934,7 +1926,7 @@ sub run(@args) is export {
         # TODO put first and last name found in top margin
         ++$page-num;
         make-badge-page @p, :side<front>, :$page, :$page-num, :$debug,
-        :$printer, :project-dir($gbumc-dir), :$method;
+        :$printer-num, :project-dir($gbumc-dir), :$method;
 
         say "Working back page..." if $debug;
         # process the back side of the page
@@ -1942,7 +1934,7 @@ sub run(@args) is export {
         # TODO put first and last name found in top margin
         ++$page-num;
         make-badge-page @p, :side<back>, :$page, :$page-num, :$debug,
-        :$printer, :project-dir($gbumc-dir), :$method;
+        :$printer-num, :project-dir($gbumc-dir), :$method;
     }
 
     # add page numbers: Page N of M
@@ -1952,13 +1944,38 @@ sub run(@args) is export {
 
 } # sub run(@args) is export
 
-sub get-list-width(
-    @text, 
-    :$font, 
-    :$font-size, 
+=finish
+# there may be no need for this, see :verbatim and :squish
+sub print-lines(
+    @text,
+    :$x!, $y!,
+    :$font!,
+    :$font-size!,
+    :$align = "left",
     :$debug,
     --> List
     ) is export {
 
-} # get-list-width
+    # get the maximum line width
+    my $lw = 0; # linewidth
+    for @text {
+        my $w = $font.stringwidth: $_, $font-size, :kern;
+        $lw = $w if $w > $lw;
+    }
+    $px -= 0.5 * $lw;
+    for $text.lines -> $line {
+        $py -= $font-size;
+        $g.print: $line, :kern, :position[$px, $py], :align<left>, :$font,
+                  :$font-size;
+    }
 
+}
+
+sub list-block-width(
+    @text,
+    :$font!,
+    :$font-size!,
+    :$debug,
+    --> List
+    ) is export {
+} # list-block-width
