@@ -16,6 +16,7 @@ sub get-text-chunks(
 
                 Printer: {$name}
 
+                Media: {$media}
 
                 Instructions
                 HERE
@@ -37,11 +38,13 @@ sub get-text-chunks(
                 1. Do not use scaling (or set scaling = 100%).
                 2. Select two-sided printing (flip on long side).
                 3. Select 'Portrait' orientation.
+                4. Please hold for pickup by Tom Browder.
+
                 HERE
 
     my $info4 = q:to/HERE/;
                 HERE
-    my $text4 = q:to/HERE/;
+    my $text4 = qq:to/HERE/;
                 Printer: $name
                 Media:   {$media}
 

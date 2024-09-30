@@ -1694,7 +1694,7 @@ sub make-printer-test-page(
     $lines-left.text = %text-chunks<3><text>; # $howto;
     $page.text: {
         my $lx = 0.5 * ($p.page-width - $lines-left.content-width);
-        .text-position = $lx, $p.page-height * 0.67;
+        .text-position = $lx, $p.page-height * 0.64;
         $lines-left.render: $g;
     }
 
