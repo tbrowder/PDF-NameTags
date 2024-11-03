@@ -158,8 +158,8 @@ sub make-badge-page(
             my $cx-gutter = $hmid1 + 0.5 * ($hmid2 - $hmid1);
             my $cy-gutter = 0.5 * $ph;
 
-            write-page-data :$printer-num, :cx($cx-gutter), :cy($cy-gutter), :$side,
-                                       :$page, :$debug;
+            write-page-data :$printer-num, :cx($cx-gutter), :cy($cy-gutter),
+                            :$side, :$page, :$debug;
         }
 
         make-label($nam1, :width($bw), :height($bh), :cx($hmid1), :$cy,
