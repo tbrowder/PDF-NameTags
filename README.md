@@ -41,7 +41,8 @@ DESCRIPTION
 
 They can be modified as needed to suit your situation.
 
-TODO:
+TODO
+====
 
 A more generic example will be created following the GBUMC example, but without the elaborate overlay or the awkward name listing format used for GBUMC (first middle last).
 
