@@ -9,16 +9,48 @@ SYNOPSIS
 ========
 
 ```raku
-use PDF::NameTags;
+$ make-name-tags
+# OUTPUT
+Usage: make-name-tags go | <csv file> [...options...]
+
+Given a list of names, writes them on reversible paper
+  for a two-sided name tag on Letter paper.
+The front side of the first two-sided page will contain
+  job details (and the back side will be blank).
+
+Options:
+  1|2     - Select option 1 (original method) or 2
+             (XForm object method), default: 1.
+
+  show    - Gives details of the job based on the input name
+            list and card dimension parameters, then exits.
+            The information is the same as on the printed job
+            cover sheet.
+
+  p=N     - For printer N. See list by number, default: 1 (Tom's HP)
+
+  ptest   - Create a printer test page for the selected printer.
+
+  media=X - Where X is Letter or A4, default: Letter
 ```
 
 DESCRIPTION
 ===========
 
-**PDF::NameTags** is ...
+**PDF::NameTags** is a work in progress (WIP), but it **can** be used to create name tags. See the '/examples/GBUMC' directory for all the pieces needed for creating a set of two-sided name tags for a local church.
+
+They can be modified as needed to suit your situation. A more generic example will be created following it, but without the elaborate overlay or the awkward name listing format used for GBUMC (first middle last).
+
+The generic method will require only:
+
+1. A text file with each line consisting of a list of the name of one person: LAST FIRST. If a person goes by two familiar names such as 'Mary Ann', then you can put both names following the LAST name, for example: 'Brown Mary Ann'. Names may be space or comma delimited (or both).
+
+2. A job entry text file with entries describing various features required such as media format (Letter or A4); width and length of the total badge area; and upper border color, content, and dimensions.
 
 AUTHOR
 ======
+
+
 
 Tom Browder <tbrowder@acm.org>
 
