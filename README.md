@@ -9,7 +9,7 @@ SYNOPSIS
 ========
 
 ```raku
-$ make-name-tags
+$ ./make-name-tags
 # OUTPUT
 Usage: make-name-tags go | <csv file> [...options...]
 
@@ -39,13 +39,19 @@ DESCRIPTION
 
 **PDF::NameTags** is a work in progress (WIP), but it **can** be used to create name tags. See the '/examples/GBUMC' directory for all the pieces needed for creating a set of two-sided name tags for a local church.
 
-They can be modified as needed to suit your situation. A more generic example will be created following it, but without the elaborate overlay or the awkward name listing format used for GBUMC (first middle last).
+They can be modified as needed to suit your situation.
 
-The generic method will require only:
+TODO:
 
-1. A text file with each line consisting of a list of the name of one person: LAST FIRST. If a person goes by two familiar names such as 'Mary Ann', then you can put both names following the LAST name, for example: 'Brown Mary Ann'. Names may be space or comma delimited (or both).
+A more generic example will be created following the GBUMC example, but without the elaborate overlay or the awkward name listing format used for GBUMC (first middle last).
+
+The generic method should require only:
+
+1. A text file with each line consisting of a list of the name of one person: LAST FIRST. If a person goes by two familiar names such as 'Mary Ann', then you will put both names following the LAST name, for example: 'Brown Mary Ann'. Names may be space or comma delimited (or both).
 
 2. A job entry text file with entries describing various features required such as media format (Letter or A4); width and length of the total badge area; and upper border color, content, and dimensions.
+
+Any prospective user is encouraged to file appropriate issues concerning the future of this module.
 
 AUTHOR
 ======
