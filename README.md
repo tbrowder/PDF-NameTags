@@ -37,7 +37,7 @@ Options:
 DESCRIPTION
 ===========
 
-**PDF::NameTags** is a work in progress (WIP), but it **can** be used to create name tags. See the '/examples/GBUMC' directory for all the pieces needed for creating a set of two-sided name tags for a local church.
+**PDF::NameTags** is a **work in progress (WIP)**, but it **can** be used to create name tags. See the '/examples/GBUMC' directory for all the pieces needed for creating a set of two-sided name tags for a local church.
 
 They can be modified as needed to suit your situation.
 
