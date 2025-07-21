@@ -9,9 +9,9 @@ use PDF::Content::FontObj; # required with XObject
 use PDF::Content::Color :rgb;
 use PDF::Lite;
 
-# Note the forms method saves time (and space) since the image is rendered only
-# once! But one needs to organize things a bit to keep track of images
-# in the XOject dictionary.
+# Note the forms method saves time (and space) since the image is
+# rendered only once! But one needs to organize things a bit to keep
+# track of images in the XOject dictionary.
 
 my PDF::Lite $pdf .= new;
 my PDF::Lite::Page $page = $pdf.add-page;
@@ -45,7 +45,7 @@ $page.graphics: {
     my PDF::Lite::XObject $png .= open("./GBUMC-logo.png");
     $page.resource-key($png) = 'png';
 
-    .do: $form, :position($cx, $cy1), :width($wscaled), :height($hscaled), 
+    .do: $form, :position($cx, $cy1), :width($wscaled), :height($hscaled),
               :valign<center>, :align<center>;
 
 }

@@ -274,7 +274,8 @@ sub make-label(
         my $gb = "GBUMC";
         my $tx = $cx;
         my $ty = $cy + ($height * 0.5) - $line1Y;
-        .transform: :translate($tx, $ty); # where $x/$y is the desired reference point
+        # where $x/$y is the desired reference point
+        .transform: :translate($tx, $ty); 
         .FillColor = color White; #rgb(0, 0, 0); # color Black
         .font = %fonts<hb>, #.core-font('HelveticaBold'),
                  $line1size; # the size
@@ -1411,7 +1412,7 @@ Loc :$position = 0, #  where {0 <= $_ < 12},
     }
 =end comment
 
-} # sub label(
+} # put-text
 
 sub draw-cross-parts(
     :$x,
