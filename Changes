@@ -1,6 +1,8 @@
 Revision history for PDF::NameTags
 
 {{$NEXT}}
+
+0.0.2  2025-07-21T09:31:01-05:00
     - Add a test file to check basic pdf creation
     - Update copyright years
 
