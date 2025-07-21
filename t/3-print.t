@@ -13,6 +13,8 @@ use PDF::Content::Text::Box;
 
 use PDF::NameTags::FreeFonts;
 
+plan 1;
+
 sub print-text {...};
 
 my %fonts = get-loaded-fonts-hash;
@@ -33,7 +35,7 @@ if $debug {
     say "See output pdf file: $ofil";
 }
 
-done-testing;
+#done-testing;
 
 sub print-text(
     $text,
