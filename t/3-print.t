@@ -27,7 +27,7 @@ my ($x, $y) = 72, 300;
 my $text = "Test text";
 print-text $text, :$font, :$page;
 
-if 1 or $debug {
+if $debug {
     my $ofil = "test3.pdf";
     $pdf.save-as: $ofil;
     say "See output pdf file: $ofil";
@@ -39,7 +39,7 @@ sub print-text(
     $text,
     :$page!,
     # text origin
-    :$x = 72, :$y = 300, 
+    :$x = 72, :$y = 300,
     :$font-size = 12,
     :$font!,   # the font file name
     :$angle = 0;
@@ -54,9 +54,9 @@ sub print-text(
         # my $tx = $cx;
         # my $ty = $cy + ($height * 0.5) - $line1Y;
         # where $x/$y is the desired reference point
-        .transform: :translate($x, $y); 
+        .transform: :translate($x, $y);
         if $angle {
-            .transform: :rotate($angle); 
+            .transform: :rotate($angle);
         }
         #.FillColor = color White; #rgb(0, 0, 0); # color Black
         .font = $font, # %fonts<hb>, #.core-font('HelveticaBold'),
@@ -65,4 +65,3 @@ sub print-text(
     }
 
 }
-
